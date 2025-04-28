@@ -68,4 +68,71 @@ Although the brain makes up only about 2 percent of your body weight, it is the 
 
 Because the brain is unable to store energy, any interruption of the blood supply produces damage very quickly (see Chapter 15). Significant brain damage occurs less than three minutes after the stopping of a person’s heart. Other structures in the body will not be affected so quickly. With life support, other organs are able to continue almost indefinitely. That is why we currently view brain death as our working definition of death. 
 
+
+Anatomical directions help us locate structures in the nervous system. In four-legged animals, rostral structures are located toward the head, caudal structures are located toward the tail, dorsal structures are located toward the back, and ventral structures are located toward the belly. In humans, the dorsal parts of our brain form an 80-degree angle with the dorsal parts of the spinal cord. Additional terms that do not vary with the body’s orientation in space include anterior (toward the front), posterior (toward the back), superior (top), and inferior (bottom). (L01) 
+
+  
+
+Ipsilateral structures are on the same side of the midline, and contralateral structures are on opposite sides of the midline. Structures near the midline are medial, and structures away from the midline are lateral. In limbs, proximal structures are closer to the body center, and distal structures are farther away. (L01) 
+
+  
+
+Coronal or frontal sections divide the brain from front to back. Sagittal sections are parallel to the midline and give us a side view of the brain. Horizontal (or axial or transverse) sections divide the brain from top to bottom. (L01) 
+
+  
+
+Three layers of meninges protect the central nervous system: the dura mater, the arachnoid, and the pia mater. Only the dura mater and pia mater layers are present in the peripheral nervous system. Cerebrospinal fluid (CSF) floats and cushions the brain. CSF circulates through the four ventricles of the brain, the central canal of the spinal cord, and the subarachnoid space. (L02) 
+
+  
+
+The brain is supplied with blood through the carotid and vertebral arteries. (L02) 
+
+
+We divide the entire nervous system into two components: the central nervous system (CNS) and the peripheral nervous system (PNS). The CNS includes the brain and spinal cord. The PNS contains all the nerves that exit the brain and spinal cord, carrying sensory and motor messages to and from the other parts of the body. The tissue of the CNS is encased in bone, but the tissue of the PNS is not. 
+
+
+Summary Points 
+
+The spinal cord is divided into cervical, thoracic, lumbar, sacral, and coccygeal segments. In addition to carrying messages to and from the brain, the spinal cord provides a variety of protective and motor reflexes. (L03) 
+
+The hindbrain consists of the medulla, pons, and cerebellum. Running through the medulla and pons at the midline is the reticular formation, which helps control arousal. The midbrain contains the remaining section of the reticular formation, the periaqueductal gray, the red nucleus, the superior colliculi, the inferior colliculi, and the substantia nigra. The forebrain is divided into the diencephalon and the telencephalon. The diencephalon contains the thalamus and hypothalamus. The telencephalon contains the cerebral cortex, basal ganglia, and limbic system structures. (L04) 
+
+The cerebral cortex is made up of six layers that cover the outer surface of the cerebral hemispheres. The hills of the cortex are referred to as gyri, and the valleys are referred to as sulci, or fissures. (L05) 
+
+The cerebral cortex is divided into four lobes: the frontal lobe, the parietal lobe, the temporal lobe, and the occipital lobe. (L05) 
+
+The two cerebral hemispheres are connected by the corpus callosum and the anterior commissure. Some functions, such as language, appear to be localized on one hemisphere or the other. (L05) 
+
+The cortex also can be divided into sensory, motor, or association cortex based on its function. (L05) 
+
+Review Questions 
+
+What are the major structures and functions found in the hindbrain, midbrain, and forebrain? 
+
+What functions can be localized in particular areas of cortex? 
+
  
+
+The Peripheral Nervous System 
+
+For all its power, the brain still depends on the PNS to enable it to perceive the outside world and to tell the body to carry out its commands. The role of the PNS is to carry sensory information from the body to the spinal cord and brain and bring back to the body commands for appropriate responses. The PNS contains three structural divisions: the cranial nerves, the spinal nerves, and the autonomic nervous system. 
+
+Together, the cranial nerves and spinal nerves make up the somatic nervous system. The somatic nervous system brings sensory input to the brain and spinal cord and returns commands to the muscles. The autonomic nervous system controls the actions of many glands and organs. The glands of the endocrine system coordinate arousal, metabolism, growth, and sex by releasing chemical messengers directly into the bloodstream. 
+
+ 
+
+ 
+
+The Cranial Nerves 
+
+12 pairs of cranial nerves enter and exit the brain directly. Three of the cranial nerves carry only sensory information. These are the olfactory nerve (I), the optic nerve (II), and the auditory nerve (VIII). Five of the nerves carry only motor information. The muscles of the eyes are controlled by the oculomotor nerve (III), the trochlear nerve (IV), and the abducens nerve (VI). The spinal accessory nerve (XI) controls the muscles of the neck, and the hypoglossal nerve (XII) controls movement of the tongue. The remaining nerves have mixed sensory and motor functions. The trigeminal nerve (V) controls chewing movements but also provides some feedback regarding facial expression. The facial nerve (VII) produces facial expressions and carries the sensation of taste. The glossopharyngeal nerve (IX) performs both sensory and motor functions for the throat. Finally, the long-distance fibers of the vagus nerve (vagus comes from the same Latin root as our word “vagabond”) (X) provide input and receive sensation from the heart, liver, and digestive tract. 
+
+ 
+
+Twelve pairs of cranial nerves leave the brain directly to carry sensory and motor information to and from the head and neck areas. The red lines represent sensory functions, and the blue lines show motor control. Some cranial nerves are sensory only, some are motor only, and some are mixed. 
+
+ 
+
+The Spinal Cord 
+
+The spinal cord is a long cylinder of nerve tissue that extends like a tail from the medulla, the most caudal structure of the brain, down to the first lumbar vertebra (a bone in the spine, or vertebral column). The neurons making up the spinal cord are found in the upper two thirds of the vertebral column. The spinal cord is shorter than the vertebral column because the cord itself stops growing earlier in a child’s development than the bones in the vertebral column do. Running down the center of the spinal cord is the central canal.
