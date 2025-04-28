@@ -1,67 +1,12 @@
-import colorama
-def prRed(skk): print("\033[91m {}\033[00m" .format(skk))
-
-
-def prGreen(skk): print("\033[92m {}\033[00m" .format(skk))
-
-
-def prYellow(skk): print("\033[93m {}\033[00m" .format(skk))
-
-
-def prLightPurple(skk): print("\033[94m {}\033[00m" .format(skk))
-
-
-def prPurple(skk): print("\033[95m {}\033[00m" .format(skk))
-
-
-def prCyan(skk): print("\033[96m {}\033[00m" .format(skk))
-
-
-def prLightGray(skk): print("\033[97m {}\033[00m" .format(skk))
-
-
-def prBlack(skk): print("\033[98m {}\033[00m" .format(skk))
-
-def prMagenta(skk): print("\033[95m {}\033[00m" .format(skk))
-
-
 def divider():
     print("\n" * 2)
     print("=" * 50)
     print("\n" * 2)
 
-
-
-divider()
-
-
-
-
-prCyan("This")
-prYellow("Is")
-prGreen("A")
-prRed("Test")
-prGreen("For")
-prCyan("Colorama")
-prMagenta("This should be magenta")
-
-
-divider()
-
-
-
 # USE THIS RGB FUNCTION FOR COLORING NOTES
 def print_rgb(text, r, g, b):
     """Prints text in the specified RGB color."""
     print(f"\033[38;2;{r};{g};{b}m{text}\033[0m")
-
-# Example usage
-print_rgb("This is a different test!", 255, 100, 0) # Orange-ish color
-print_rgb("Using RGB", 50, 10, 222) # Blue color
-print_rgb("Sucessful!", 150, 255, 150) #Light Green color
-
-divider()
-
 
 # get key terms, look for them in notes, print surrounding text and put key terms in color 
 # I want to use this to get definitions for key terms quickly
@@ -124,19 +69,51 @@ def find_term_in_notes(notes_content, term):
     
     return contexts
 
-def highlight_term_in_context(context, term, r, g, b):
-    """Highlight the term in the context with the specified RGB color."""
-    paragraph, term_pos = context
-    term_len = len(term)
+def highlight_all_terms_in_paragraph(paragraph, key_terms, term_colors):
+    """Highlight all key terms in a paragraph with their respective colors."""
+    # Create a list of all term occurrences with their positions
+    term_occurrences = []
     
-    # Print the text before the term
-    print(paragraph[:term_pos], end='')
+    for term, color in zip(key_terms, term_colors):
+        term_lower = term.lower()
+        paragraph_lower = paragraph.lower()
+        
+        # Find all occurrences of this term in the paragraph
+        start_pos = 0
+        while True:
+            pos = paragraph_lower.find(term_lower, start_pos)
+            if pos == -1:
+                break
+            
+            # Add this occurrence to our list
+            term_occurrences.append((pos, pos + len(term), term, color))
+            start_pos = pos + len(term)
     
-    # Print the term in color
-    print_rgb(paragraph[term_pos:term_pos+term_len], r, g, b)
+    # Sort occurrences by position
+    term_occurrences.sort(key=lambda x: x[0])
     
-    # Print the text after the term
-    print(paragraph[term_pos+term_len:])
+    # Check for overlapping terms and remove them
+    non_overlapping = []
+    last_end = -1
+    
+    for start, end, term, color in term_occurrences:
+        if start >= last_end:  # No overlap
+            non_overlapping.append((start, end, term, color))
+            last_end = end
+    
+    # Print the paragraph with highlighted terms
+    last_pos = 0
+    for start, end, term, color in non_overlapping:
+        # Print text before the term
+        print(paragraph[last_pos:start], end='')
+        
+        # Print the term in its color
+        print_rgb(paragraph[start:end], color[0], color[1], color[2])
+        
+        last_pos = end
+    
+    # Print any remaining text
+    print(paragraph[last_pos:])
     print()  # Add a newline for readability
 
 def organize_notes_by_key_terms():
@@ -173,22 +150,27 @@ def organize_notes_by_key_terms():
         (150, 150, 255)   # Light Blue
     ]
     
-    # Find and highlight each term in the notes
-    for i, term in enumerate(key_terms):
-        # Select a color for this term (cycle through the colors)
-        color = colors[i % len(colors)]
-        
-        # Find the term in the notes
+    # Create a list of term colors (cycling through the colors list)
+    term_colors = [colors[i % len(colors)] for i in range(len(key_terms))]
+    
+    # Create a dictionary to store all contexts for each term
+    term_contexts = {}
+    
+    # Find contexts for each term
+    for term in key_terms:
         contexts = find_term_in_notes(notes_content, term)
-        
         if contexts:
-            print(f"Key Term: {term}")
-            print("-" * 40)
-            
             for context in contexts:
-                highlight_term_in_context(context, term, color[0], color[1], color[2])
-            
-            divider()
+                paragraph = context[0]
+                if paragraph not in term_contexts:
+                    term_contexts[paragraph] = term
+                    
+    # Print each unique paragraph with all terms highlighted
+    for paragraph, primary_term in term_contexts.items():
+        print(f"Key Term: {primary_term}")
+        print("-" * 40)
+        highlight_all_terms_in_paragraph(paragraph, key_terms, term_colors)
+        divider()
         
 # Run the function
 organize_notes_by_key_terms()
