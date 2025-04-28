@@ -1,0 +1,71 @@
+Anatomical Directions and Planes of Section 
+
+Navigating around the three-dimensional human brain is similar to describing the geography of our three-dimensional earth. Without a vocabulary to describe the location of one area relative to others, we would quickly get lost. Instead of north, south, east, or west, anatomists have their own sets of directional terms. Although it might seem to be a lot of work to memorize these terms, the payoff comes when you can locate structures easily by their names. The ventromedial hypothalamus could simply be memorized, but knowing that ventral means toward the belly side of an animal and medial means toward the midline, you will know exactly where to look in the hypothalamus for this structure. 
+
+Because anatomical directions for human beings are complicated by the fact that we walk on two legs, we’ll start off with the simpler case of the four-legged animal. Structures that are located toward the head end of the animal are rostral. In other words, the head of a dog is rostral to its shoulders. Structures located toward the tail end of the animal are caudal. For example, the dog’s ears are caudal to its nose, and its hips are caudal to its shoulders. Structures located toward the belly side are ventral, whereas structures toward the back are dorsal. If you have trouble keeping these last two straight, it might help to remember that scary dorsal shark fin cutting through the water in the film Jaws. Like geographical terms, these anatomical terms are relative to another place. Just as New York is north of Florida but south of Canada, the dog’s ears are caudal to its nose but rostral to its shoulders. 
+
+Why are anatomical directions different in people? As shown in Figure 2.1, our two-legged stance puts a bend in the neuraxis, an imaginary line that runs the length of the spinal cord through the brain. In the four-legged animal, the neuraxis forms a straight line running parallel to the ground. The dorsal parts of the animal’s brain are in line with the dorsal parts of the spinal cord. In humans, the dorsal parts of our brain form an 80-degree angle with the dorsal parts of the spinal cord, so that the dorsal part of the brain is on the top of your head, but the dorsal part of the spinal cord runs along your back. In contrast, a second set of anatomical terms (anterior– posterior, superior– inferior) does not change with the bending of the neuraxis. You can think of the ceiling as superior, the floor as inferior, the front wall of your classroom as anterior, and the back wall of the classroom as posterior. Using this set of terms, the rostral part of your brain and the ventral part of your spinal cord would both be referred to as “anterior.” 
+
+Additional directional terms refer to the midline, an imaginary line that divides us into approximately equal halves. If two structures are ipsilateral, they are both on the same side of the midline. My left arm and left leg are ipsilateral. If structures are on opposite sides of the midline, we say they are contralateral. My right arm and left leg are contralateral to each other. Structures close to the midline are referred to as medial, and structures to the side of the midline are called lateral. My heart is medial to my arms, whereas my ears are lateral to my nose. Similar terms include proximal, which means close to the center, and distal, which means far away from the center. Usually, we use these two terms to refer to limbs. My toes are distal relative to my knees, and my shoulders are proximal relative to my elbows. 
+  
+Although directional terms help us find our way around the nervous system, we also need a way to view three-dimensional structures as flat images on a page. Anatomists have found it useful to make particular cuts or sections in the nervous system to view the structures in two rather than three dimensions. The choice of how to make the section can be arbitrary. Different structures are often more easily viewed with one section than with others. My graduate neuroanatomy professor, the esteemed Dr. Arnold Scheibel, was fond of using his favorite diagonal sections during exams. Traditionally, we use the coronal, sagittal, and horizontal sections, which can be seen in Figure 2.2. Coronal sections, also known as frontal sections, divide the nervous system from front to back. Sagittal sections are parallel to the midline, allowing us a side view of brain structures. The special section that divides the brain into two relatively equal halves is known as a midsagittal section. The third type of section is the horizontal section also known as an axial or transverse section, which divides the brain from top to bottom.  
+
+Protecting and Supplying the Nervous System 
+
+Because of the obvious importance of the brain, it is one of the most protected organs in your body. The bony skull protects the brain from all but the most serious blows. It is important to note, however, that the skull bones are not fully mature in infants. The infant is born with skull bones that can overlap each other, somewhat like the tectonic plates of the earth. This design aids the movement of the baby’s head through the birth canal. In a young baby with very light or no hair, you can often see a pulse at the top of the head between the skull bones, known as a soft spot, or fontanel. It takes about 18 months for human skull bones to fuse completely. 
+
+Meninges 
+
+Although the bones offer the best defense, even the baby with a soft spot enjoys substantial protection of its brain provided by three layers of membranes, or meninges, that surround the nervous system. 
+
+
+The outermost layer of the meninges is known as the dura mater, which literally means “hard mother” in Latin. Our word durable comes from the same root. The reference to “mother” might have originated from early comparisons between the protective membranes and the blankets used to swaddle infants. The dura mater is composed of leatherlike tissue that follows the outlines of the skull bones. Below the dura mater is the arachnoid layer. This more delicate layer gets its name from the fact that its structure looks like a spider’s web in cross-section. The innermost layer is the pia mater, or “pious mother.” This nearly transparent membrane sticks closely to the outside of the brain. Between the arachnoid and pia mater layers is the subarachnoid space, with “sub” meaning below. All three of these layers cover the brain and spinal cord. Once nerves leave the bony protection of the skull bones and vertebrae of the back, they are referred to as peripheral nerves and are protected by only the dura mater and pia mater. There is no arachnoid layer or subarachnoid space surrounding these peripheral nerves. 
+
+
+Viruses and bacteria can invade the layers of the meninges, causing meningitis. Meningitis causes headache and stiffness of the neck, which can be followed by incoherence, drowsiness, coma, and death. This photo shows a fatal case of meningitis with large areas of pus within the meninges. 
+
+ 
+
+Cerebrospinal Fluid 
+
+Cerebrospinal fluid (CSF) is secreted within hollow spaces in the brain known as ventricles. Within the lining of the ventricles, the choroid plexus converts material from the nearby blood supply into CSF. CSF is very similar in composition to the clear plasma of the blood. Because of its weight and composition, CSF essentially floats the brain within the skull. This has several advantages. If you bump your head, the fluid acts like a cushion to soften the blow to your brain. In addition, nerve cells (neurons) respond to appropriate input, not to pressure on the brain. Pressure can often cause neurons to fire in maladaptive ways, such as when a tumor causes seizures by pressing down on a part of the brain. By floating the brain, the CSF prevents neurons from responding to pressure and providing false information. 
+
+  
+
+CSF circulates through the central canal of the spinal cord and four ventricles in the brain: the two lateral ventricles, one in each hemisphere, and the third and fourth ventricles in the brainstem. The fourth ventricle is continuous with the central canal of the spinal cord, which runs the length of the cord at its midline. The ventricles and the circulation of CSF are illustrated in Figure 2.5 Below the fourth ventricle, there is a small opening that allows the CSF to flow into the subarachnoid space that surrounds both the brain and spinal cord. New CSF is made constantly, with the entire supply being turned over about three times per day. The old CSF is reabsorbed into the blood supply at the top of the head. 
+
+Because there are several narrow sections in this circulation system, blockages sometimes occur. This condition, known as hydrocephalus, is apparent at birth in affected infants. Hydrocephalus literally means water on the head. Left untreated, hydrocephalus can cause intellectual disability, as the large quantity of CSF prevents the normal growth of the brain. Currently, however, hydrocephalus can be treated by the installation of a shunt to drain off excess fluid, as shown in Figure 2.7. When the baby is old enough, surgery can be used to repair the obstruction. Some adults also experience blockages of the CSF circulatory system due to the growth of tumors or scar tissue. They, too, must be treated with shunts and/or surgery. 
+
+ 
+
+CSF moves through a completely self-contained and separate circulation system that never has direct contact with the blood supply. Because the composition of the CSF is often important in diagnosing diseases, a spinal tap is a common, though extremely unpleasant, procedure. In a spinal tap, the physician withdraws some fluid from the subarachnoid space surrounding the spinal cord through a needle. 
+
+ 
+
+Behavioral Neuroscience Goes to Work Treating Hydrocephalus 
+
+Hydrocephalus affects both newborns and adults. Obstructions, poor reabsorption, and overproduction can lead to symptoms of head enlargement, headache, nausea and vomiting, loss of bladder control, poor balance and coordination, and cognitive impairment. Because these symptoms can be caused by a number of different conditions, the diagnosis of hydrocephalus is made on the basis of neurological exams and brain imaging. Some cases of hydrocephalus are noted in prenatal ultrasounds. 
+
+  
+
+The typical treatment for hydrocephalus involves surgery. Most commonly, a shunt is placed within one of the ventricles of the brain. Tubing is inserted under the skin, allowing the excess fluid to be redirected to the abdomen or a chamber of the heart, where it will be reabsorbed by the body without doing further harm. A valve controls the rate and direction of flow, so there is limited danger of too much fluid being drained away from the system. A less typical surgical treatment is the ventriculostomy, which involves making a small hole in the bottom of the floor of the third ventricle or between two ventricles to improve circulation of CSF. 
+
+  
+
+In addition to neurologists and neurosurgeons, teams treating hydrocephalus usually include occupational therapists, developmental therapists for children, special education teachers, social workers, and mental health providers, who help the patient and family cope with a serious, potentially disabling disorder. 
+
+ 
+
+Hydrocephalus in newborns used to be a major cause of intellectual disability. Contemporary treatment consisting of shunts inserted into the ventricle that drain excess cerebrospinal fluid (CSF) to the abdomen or heart has reduced the damage done to the brains of individuals with this condition. 
+
+ 
+
+The Brain’s Blood Supply 
+
+Although the brain makes up only about 2 percent of your body weight, it is the target of about 15 to 20 percent of the blood pumped by the heart. The brain is served by the carotid arteries on either side of the neck as well as through the vertebral arteries that travel up through the back of the skull. Once inside the skull, these major arteries branch to form the anterior, middle, and posterior cerebral arteries, which serve most of the brain. 
+
+ 
+
+Because the brain is unable to store energy, any interruption of the blood supply produces damage very quickly (see Chapter 15). Significant brain damage occurs less than three minutes after the stopping of a person’s heart. Other structures in the body will not be affected so quickly. With life support, other organs are able to continue almost indefinitely. That is why we currently view brain death as our working definition of death. 
+
+ 
