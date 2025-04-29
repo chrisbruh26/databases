@@ -16,24 +16,42 @@ def read_file(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             return file.read()
+    except FileNotFoundError:
+        # Create the file if it doesn't exist
+        if file_path in ["definitions.txt", "keyterms.txt"]:
+            try:
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    pass  # Create empty file
+                print(f"Created new file: {file_path}")
+                return ""
+            except Exception as e:
+                print(f"Error creating file {file_path}: {e}")
+                return ""
+        else:
+            print(f"File not found: {file_path}")
+            return ""
     except Exception as e:
         print(f"Error reading file {file_path}: {e}")
         return ""
 
-def extract_key_terms(keyterms_content):
+def extract_key_terms(keyterms_content, definitions_content=None):
     """
-    Extract key terms from the keyterms.txt file.
+    Extract key terms from the keyterms.txt file and definitions from definitions.txt.
     
-    Format can be:
+    Format for keyterms.txt:
     - One term per line
-    - Term:Definition (optional)
     - Term#Category (optional)
-    - Term:Definition#Category (optional)
+    
+    Format for definitions.txt:
+    - Term:Definition
+    - Term:Definition:AdditionalInfo1:AdditionalInfo2...
     """
     key_terms = []
     term_definitions = {}
     term_categories = {}
+    term_additional_info = {}
     
+    # Process keyterms.txt for terms and categories
     for line in keyterms_content.splitlines():
         line = line.strip()
         if not line:  # Skip empty lines
@@ -45,26 +63,38 @@ def extract_key_terms(keyterms_content):
             line, category = line.split('#', 1)
             category = category.strip()
             
-        # Check for definition
-        definition = None
-        if ':' in line:
-            term, definition = line.split(':', 1)
-            term = term.strip()
-            definition = definition.strip()
-        else:
-            term = line.strip()
+        term = line.strip()
             
         if term:
             key_terms.append(term)
-            if definition:
-                term_definitions[term] = definition
             if category:
                 term_categories[term] = category
     
-    return key_terms, term_definitions, term_categories
+    # Process definitions.txt for definitions and additional info
+    if definitions_content:
+        for line in definitions_content.splitlines():
+            line = line.strip()
+            if not line or ':' not in line:  # Skip lines without definitions
+                continue
+                
+            parts = line.split(':')
+            if len(parts) >= 2:
+                term = parts[0].strip()
+                definition = parts[1].strip()
+                
+                if term and definition:
+                    term_definitions[term] = definition
+                    
+                    # Extract additional information if available
+                    if len(parts) > 2:
+                        additional_info = [info.strip() for info in parts[2:] if info.strip()]
+                        if additional_info:
+                            term_additional_info[term] = additional_info
+    
+    return key_terms, term_definitions, term_categories, term_additional_info
 
 def find_term_in_notes(notes_content, term):
-    """Find a term in the notes and return the surrounding context."""
+    """Find a term in the notes and return the surrounding context with intelligent extraction."""
     import re
     
     # Create a regex pattern that matches the term, including possible plurals and punctuation
@@ -95,7 +125,60 @@ def find_term_in_notes(notes_content, term):
         # Calculate the position of the term within the extracted paragraph
         term_pos_in_para = pos - para_start
         
-        contexts.append((paragraph, term_pos_in_para))
+        # Check if this is a definition-like context
+        is_definition = False
+        
+        # Look for definition patterns
+        definition_patterns = [
+            r'\b' + re.escape(term.lower()) + r'\s+(?:is|are|refers to|describes|means|defined as)',
+            r'\b' + re.escape(term.lower()) + r'(?:s|es)?\s*:\s*\w+',
+            r'(?:called|known as|termed)\s+(?:a|an|the)?\s*' + re.escape(term.lower()),
+            r'(?:definition|meaning) of\s+(?:a|an|the)?\s*' + re.escape(term.lower())
+        ]
+        
+        for pattern in definition_patterns:
+            if re.search(pattern, paragraph.lower()):
+                is_definition = True
+                break
+        
+        # Look for function/purpose patterns
+        function_patterns = [
+            r'\b' + re.escape(term.lower()) + r'(?:s|es)?\s+(?:function|role|purpose|helps|helps to|serves to|allows|enables)',
+            r'(?:function|role|purpose) of\s+(?:a|an|the)?\s*' + re.escape(term.lower()),
+            r'\b' + re.escape(term.lower()) + r'(?:s|es)?\s+(?:is|are) responsible for'
+        ]
+        
+        is_function = False
+        for pattern in function_patterns:
+            if re.search(pattern, paragraph.lower()):
+                is_function = True
+                break
+        
+        # Look for relationship patterns
+        relationship_patterns = [
+            r'\b' + re.escape(term.lower()) + r'(?:s|es)?\s+(?:connects|connects to|relates to|interacts with|part of)',
+            r'(?:connected|related) to\s+(?:a|an|the)?\s*' + re.escape(term.lower()),
+            r'\b' + re.escape(term.lower()) + r'(?:s|es)?\s+(?:contains|includes|consists of)'
+        ]
+        
+        is_relationship = False
+        for pattern in relationship_patterns:
+            if re.search(pattern, paragraph.lower()):
+                is_relationship = True
+                break
+        
+        # Add context with metadata
+        contexts.append({
+            'text': paragraph,
+            'position': term_pos_in_para,
+            'is_definition': is_definition,
+            'is_function': is_function,
+            'is_relationship': is_relationship,
+            'relevance_score': sum([is_definition * 3, is_function * 2, is_relationship * 1])
+        })
+    
+    # Sort contexts by relevance score (higher is better)
+    contexts.sort(key=lambda x: x['relevance_score'], reverse=True)
     
     return contexts
 
@@ -159,13 +242,18 @@ def organize_notes_by_key_terms(filter_terms=None, filter_category=None, show_te
     # Read the files
     notes_content = read_file("notes.txt")
     keyterms_content = read_file("keyterms.txt")
+    definitions_content = read_file("definitions.txt")
     
-    if not notes_content or not keyterms_content:
-        print("Error: Could not read input files.")
+    if not notes_content:
+        print("Error: Could not read notes.txt file.")
+        return
+    
+    if not keyterms_content:
+        print("Error: No terms found in keyterms.txt")
         return
     
     # Extract key terms and their metadata
-    all_key_terms, term_definitions, term_categories = extract_key_terms(keyterms_content)
+    all_key_terms, term_definitions, term_categories, term_additional_info = extract_key_terms(keyterms_content, definitions_content)
     
     if not all_key_terms:
         print("No key terms found in keyterms.txt")
@@ -266,8 +354,7 @@ def organize_notes_by_key_terms(filter_terms=None, filter_category=None, show_te
             if term not in term_contexts:
                 term_contexts[term] = []
             for context in contexts:
-                paragraph = context[0]
-                term_contexts[term].append(paragraph)
+                term_contexts[term].append(context)
     
     # Print contexts organized by term
     for term in key_terms:
@@ -282,51 +369,103 @@ def organize_notes_by_key_terms(filter_terms=None, filter_category=None, show_te
             if term in term_definitions:
                 print(f"Definition: {term_definitions[term]}")
                 
+            # Print additional information if available
+            if term in term_additional_info:
+                print("\nAdditional Information:")
+                for i, info in enumerate(term_additional_info[term], 1):
+                    print(f"  {i}. {info}")
+            
             print("-" * 40)
             
-            # Print each context for this term
-            for i, paragraph in enumerate(term_contexts[term]):
+            # Print each context for this term, sorted by relevance
+            for i, context in enumerate(term_contexts[term]):
+                paragraph = context['text']
+                
+                # Add context type labels
+                context_type = []
+                if context['is_definition']:
+                    context_type.append("Definition")
+                if context['is_function']:
+                    context_type.append("Function/Purpose")
+                if context['is_relationship']:
+                    context_type.append("Relationship")
+                
+                context_header = f" Context {i+1} "
+                if context_type:
+                    context_header += f"({', '.join(context_type)}) "
+                
                 if i > 0:
-                    print("\n" + "-" * 20 + f" Context {i+1} " + "-" * 20)
+                    print("\n" + "-" * 20 + context_header + "-" * 20)
+                else:
+                    print(context_header + "-" * 20)
+                
                 highlight_all_terms_in_paragraph(paragraph, key_terms, term_colors)
             
             divider()
 
 def add_term():
-    """Add a new term to keyterms.txt."""
+    """Add a new term to keyterms.txt and definitions.txt."""
     term = input("Enter the term: ").strip()
     if not term:
         print("Term cannot be empty.")
         return
         
     definition = input("Enter definition (optional): ").strip()
+    additional_info = []
+    
+    if definition:
+        # Allow adding multiple pieces of additional information
+        print("\nYou can add additional information about this term.")
+        print("This could include functions, relationships to other terms, examples, etc.")
+        print("Enter each piece of information separately, or leave blank to finish.")
+        
+        while True:
+            info = input("Additional information (leave empty to finish): ").strip()
+            if not info:
+                break
+            additional_info.append(info)
+    
     category = input("Enter category (optional): ").strip()
     
-    # Format the new term entry
-    new_entry = term
-    if definition:
-        new_entry += f": {definition}"
+    # Add term to keyterms.txt (with category only)
+    term_entry = term
     if category:
-        new_entry += f"#{category}"
+        term_entry += f"#{category}"
     
-    # Append to keyterms.txt
+    # Add definition and additional info to definitions.txt
+    if definition:
+        def_entry = f"{term}:{definition}"
+        if additional_info:
+            for info in additional_info:
+                def_entry += f":{info}"
+    
+    # Write to files
     try:
+        # Add to keyterms.txt
         with open("keyterms.txt", 'a', encoding='utf-8') as file:
-            file.write(f"\n{new_entry}")
+            file.write(f"\n{term_entry}")
+        
+        # Add to definitions.txt if there's a definition
+        if definition:
+            with open("definitions.txt", 'a', encoding='utf-8') as file:
+                file.write(f"\n{def_entry}")
+        
         print(f"Term '{term}' added successfully!")
     except Exception as e:
         print(f"Error adding term: {e}")
 
 def update_term():
-    """Update an existing term in keyterms.txt."""
-    # Read the current terms
+    """Update an existing term in keyterms.txt and definitions.txt."""
+    # Read the current terms and definitions
     keyterms_content = read_file("keyterms.txt")
+    definitions_content = read_file("definitions.txt")
+    
     if not keyterms_content:
         print("Error: Could not read keyterms.txt")
         return
         
     # Extract terms and their metadata
-    all_terms, term_definitions, term_categories = extract_key_terms(keyterms_content)
+    all_terms, term_definitions, term_categories, term_additional_info = extract_key_terms(keyterms_content, definitions_content)
     
     if not all_terms:
         print("No terms found in keyterms.txt")
@@ -366,18 +505,43 @@ def update_term():
             print(f"No term found containing '{term_to_update}'.")
             return
     
-    # Show current definition and category if they exist
+    # Show current information
     current_definition = term_definitions.get(term_to_update, "")
     current_category = term_categories.get(term_to_update, "")
+    current_additional_info = term_additional_info.get(term_to_update, [])
     
     print(f"\nUpdating term: {term_to_update}")
     if current_definition:
         print(f"Current definition: {current_definition}")
+    if current_additional_info:
+        print("Current additional information:")
+        for i, info in enumerate(current_additional_info, 1):
+            print(f"  {i}. {info}")
     if current_category:
         print(f"Current category: {current_category}")
     
     # Get new values
     new_definition = input(f"Enter new definition (leave empty to {'keep current' if current_definition else 'skip'}): ").strip()
+    
+    # Handle additional information
+    new_additional_info = []
+    if current_additional_info or new_definition:
+        print("\nYou can update additional information about this term.")
+        print("This could include functions, relationships to other terms, examples, etc.")
+        
+        if current_additional_info:
+            keep_current = input("Keep current additional information? (y/n): ").strip().lower()
+            if keep_current == 'y':
+                new_additional_info = current_additional_info.copy()
+        
+        if not new_additional_info or input("Add more information? (y/n): ").strip().lower() == 'y':
+            print("Enter each piece of information separately, or leave blank to finish.")
+            while True:
+                info = input("Additional information (leave empty to finish): ").strip()
+                if not info:
+                    break
+                new_additional_info.append(info)
+    
     new_category = input(f"Enter new category (leave empty to {'keep current' if current_category else 'skip'}): ").strip()
     
     # Use current values if new ones are not provided
@@ -386,14 +550,14 @@ def update_term():
     if not new_category and current_category:
         new_category = current_category
     
-    # Read all lines from the file
+    # Update keyterms.txt (term and category)
     try:
         with open("keyterms.txt", 'r', encoding='utf-8') as file:
-            lines = file.readlines()
+            keyterm_lines = file.readlines()
         
-        # Find and update the line containing the term
-        updated = False
-        for i, line in enumerate(lines):
+        # Find and update the term in keyterms.txt
+        keyterm_updated = False
+        for i, line in enumerate(keyterm_lines):
             line = line.strip()
             if not line:
                 continue
@@ -403,27 +567,63 @@ def update_term():
             if '#' in parsed_line:
                 parsed_line = parsed_line.split('#', 1)[0]
             
-            term = parsed_line.split(':', 1)[0].strip() if ':' in parsed_line else parsed_line.strip()
+            term = parsed_line.strip()
             
             if term == term_to_update:
                 # Construct the updated line
                 updated_line = term_to_update
-                if new_definition:
-                    updated_line += f": {new_definition}"
                 if new_category:
                     updated_line += f"#{new_category}"
                 
-                lines[i] = updated_line + '\n'
-                updated = True
+                keyterm_lines[i] = updated_line + '\n'
+                keyterm_updated = True
                 break
         
-        if updated:
-            # Write the updated content back to the file
+        if keyterm_updated:
+            # Write the updated content back to keyterms.txt
             with open("keyterms.txt", 'w', encoding='utf-8') as file:
-                file.writelines(lines)
-            print(f"Term '{term_to_update}' updated successfully!")
+                file.writelines(keyterm_lines)
         else:
-            print(f"Could not find term '{term_to_update}' in the file. This is unexpected.")
+            print(f"Could not find term '{term_to_update}' in keyterms.txt. This is unexpected.")
+            return
+            
+        # Update definitions.txt if there's a definition
+        if new_definition:
+            with open("definitions.txt", 'r', encoding='utf-8') as file:
+                def_lines = file.readlines()
+            
+            # Find if the term already exists in definitions.txt
+            def_updated = False
+            for i, line in enumerate(def_lines):
+                line = line.strip()
+                if not line or ':' not in line:
+                    continue
+                
+                parts = line.split(':', 1)
+                term = parts[0].strip()
+                
+                if term == term_to_update:
+                    # Construct the updated definition line
+                    updated_line = f"{term_to_update}:{new_definition}"
+                    for info in new_additional_info:
+                        updated_line += f":{info}"
+                    
+                    def_lines[i] = updated_line + '\n'
+                    def_updated = True
+                    break
+            
+            # If term not found in definitions.txt, append it
+            if not def_updated:
+                new_line = f"{term_to_update}:{new_definition}"
+                for info in new_additional_info:
+                    new_line += f":{info}"
+                def_lines.append(new_line + '\n')
+            
+            # Write the updated content back to definitions.txt
+            with open("definitions.txt", 'w', encoding='utf-8') as file:
+                file.writelines(def_lines)
+        
+        print(f"Term '{term_to_update}' updated successfully!")
             
     except Exception as e:
         print(f"Error updating term: {e}")
@@ -432,14 +632,16 @@ def quiz_mode(num_questions=5):
     """Quiz the user on random terms."""
     import random
     
-    # Read keyterms file
+    # Read keyterms and definitions files
     keyterms_content = read_file("keyterms.txt")
+    definitions_content = read_file("definitions.txt")
+    
     if not keyterms_content:
         print("Error: Could not read keyterms.txt")
         return
         
     # Extract terms and definitions
-    all_terms, term_definitions, term_categories = extract_key_terms(keyterms_content)
+    all_terms, term_definitions, term_categories, term_additional_info = extract_key_terms(keyterms_content, definitions_content)
     
     # Filter to terms that have definitions
     terms_with_defs = [term for term in all_terms if term in term_definitions]
@@ -459,15 +661,28 @@ def quiz_mode(num_questions=5):
     
     for i, term in enumerate(quiz_terms, 1):
         print(f"Question {i}: Define '{term}'")
+        
+        # If there's a category, give a hint
+        if term in term_categories:
+            print(f"Hint: This term is in the category '{term_categories[term]}'")
+            
         input("Press Enter when ready to see the answer...")
         
         # Show the definition
         print(f"Definition: {term_definitions[term]}")
         
+        # Show additional information if available
+        if term in term_additional_info:
+            print("\nAdditional Information:")
+            for j, info in enumerate(term_additional_info[term], 1):
+                print(f"  {j}. {info}")
+        
         # Ask if they got it right
-        got_it = input("Did you know this? (y/n): ").strip().lower()
+        got_it = input("\nDid you know this? (y/n/partial): ").strip().lower()
         if got_it == 'y':
             correct += 1
+        elif got_it == 'partial':
+            correct += 0.5
             
         print()  # Add spacing between questions
     
@@ -481,39 +696,125 @@ def quiz_mode(num_questions=5):
         print("Good job! Keep reviewing to improve further.")
     else:
         print("Keep studying! Try reviewing the terms again.")
+        
+    # Offer to review missed terms
+    if correct < num_questions:
+        review = input("\nWould you like to review the terms you missed? (y/n): ").strip().lower()
+        if review == 'y':
+            print("\n=== REVIEW ===\n")
+            for term in quiz_terms:
+                print(f"Term: {term}")
+                if term in term_categories:
+                    print(f"Category: {term_categories[term]}")
+                print(f"Definition: {term_definitions[term]}")
+                if term in term_additional_info:
+                    print("Additional Information:")
+                    for info in term_additional_info[term]:
+                        print(f"  - {info}")
+                print()
+                input("Press Enter to continue...")
+                print()
 
 def study_session():
     """Run a focused study session."""
-    # Read keyterms file
+    # Read keyterms and definitions files
     keyterms_content = read_file("keyterms.txt")
+    definitions_content = read_file("definitions.txt")
+    
     if not keyterms_content:
         print("Error: Could not read keyterms.txt")
         return
         
     # Extract terms and categories
-    all_terms, term_definitions, term_categories = extract_key_terms(keyterms_content)
-    
-    # Get all categories
-    categories = sorted(set(term_categories.values()))
-    
-    if not categories:
-        print("No categories found. Add categories to your terms first.")
-        return
+    all_terms, term_definitions, term_categories, term_additional_info = extract_key_terms(keyterms_content, definitions_content)
     
     print("\n=== STUDY SESSION ===")
-    print("Available categories:")
-    
-    for i, category in enumerate(categories, 1):
-        print(f"  {i}. {category}")
+    print("Study options:")
+    print("  1. Study by category")
+    print("  2. Study terms with definitions")
+    print("  3. Study terms with additional information")
+    print("  4. Study terms that appear most in notes")
     
     try:
-        choice = int(input("\nSelect a category (number): "))
-        if 1 <= choice <= len(categories):
-            selected_category = categories[choice-1]
-            print(f"\nStudying category: {selected_category}")
-            organize_notes_by_key_terms(filter_category=selected_category)
+        option = int(input("\nSelect an option (1-4): "))
+        
+        if option == 1:
+            # Get all categories
+            categories = sorted(set(term_categories.values()))
+            
+            if not categories:
+                print("No categories found. Add categories to your terms first.")
+                return
+            
+            print("\nAvailable categories:")
+            
+            for i, category in enumerate(categories, 1):
+                # Count terms in this category
+                count = len([t for t in all_terms if t in term_categories and term_categories[t] == category])
+                print(f"  {i}. {category} ({count} terms)")
+            
+            choice = int(input("\nSelect a category (number): "))
+            if 1 <= choice <= len(categories):
+                selected_category = categories[choice-1]
+                print(f"\nStudying category: {selected_category}")
+                organize_notes_by_key_terms(filter_category=selected_category)
+            else:
+                print("Invalid selection.")
+                
+        elif option == 2:
+            # Study terms with definitions
+            terms_with_defs = [t for t in all_terms if t in term_definitions]
+            
+            if not terms_with_defs:
+                print("No terms with definitions found. Add definitions to your terms first.")
+                return
+                
+            print(f"\nFound {len(terms_with_defs)} terms with definitions.")
+            organize_notes_by_key_terms(filter_terms=terms_with_defs)
+            
+        elif option == 3:
+            # Study terms with additional information
+            terms_with_info = [t for t in all_terms if t in term_additional_info]
+            
+            if not terms_with_info:
+                print("No terms with additional information found.")
+                return
+                
+            print(f"\nFound {len(terms_with_info)} terms with additional information.")
+            organize_notes_by_key_terms(filter_terms=terms_with_info)
+            
+        elif option == 4:
+            # Study terms that appear most in notes
+            notes_content = read_file("notes.txt")
+            if not notes_content:
+                print("Error: Could not read notes.txt")
+                return
+                
+            # Count occurrences of each term
+            term_counts = {}
+            for term in all_terms:
+                contexts = find_term_in_notes(notes_content, term)
+                term_counts[term] = len(contexts)
+            
+            # Sort terms by occurrence count (descending)
+            sorted_terms = sorted(term_counts.items(), key=lambda x: x[1], reverse=True)
+            
+            # Display top terms
+            print("\nTerms by frequency in notes:")
+            for i, (term, count) in enumerate(sorted_terms[:10], 1):
+                print(f"  {i}. {term} ({count} occurrences)")
+                
+            # Ask how many top terms to study
+            try:
+                num = int(input("\nHow many top terms to study? (default: 5): ") or "5")
+                top_terms = [term for term, _ in sorted_terms[:num]]
+                organize_notes_by_key_terms(filter_terms=top_terms)
+            except ValueError:
+                print("Invalid input. Using default of 5 terms.")
+                top_terms = [term for term, _ in sorted_terms[:5]]
+                organize_notes_by_key_terms(filter_terms=top_terms)
         else:
-            print("Invalid selection.")
+            print("Invalid option.")
     except ValueError:
         print("Please enter a valid number.")
 
