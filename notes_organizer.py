@@ -31,18 +31,17 @@ def extract_key_terms(keyterms_content):
 
 def find_term_in_notes(notes_content, term):
     """Find a term in the notes and return the surrounding context."""
-    term_lower = term.lower()
-    notes_lower = notes_content.lower()
+    import re
+    
+    # Create a regex pattern that matches the term, including possible plurals and punctuation
+    pattern = r'\b' + re.escape(term.lower()) + r'(?:s|,|\.|:|;)?\b'
     
     # Find all occurrences of the term
     contexts = []
-    start_pos = 0
     
-    while True:
-        pos = notes_lower.find(term_lower, start_pos)
-        if pos == -1:
-            break
-            
+    for match in re.finditer(pattern, notes_content.lower()):
+        pos = match.start()
+        
         # Get context (paragraph containing the term)
         # Find the start of the paragraph
         para_start = notes_content.rfind('\n\n', 0, pos)
@@ -63,29 +62,27 @@ def find_term_in_notes(notes_content, term):
         term_pos_in_para = pos - para_start
         
         contexts.append((paragraph, term_pos_in_para))
-        start_pos = pos + len(term)
     
     return contexts
 
 def highlight_all_terms_in_paragraph(paragraph, key_terms, term_colors):
     """Highlight all key terms in a paragraph with their respective colors."""
+    import re
+    
     # Create a list of all term occurrences with their positions
     term_occurrences = []
     
     for term, color in zip(key_terms, term_colors):
-        term_lower = term.lower()
-        paragraph_lower = paragraph.lower()
+        # Create a regex pattern that matches the term followed by optional 's', ',', or '.'
+        # The word boundary \b ensures we match whole words
+        pattern = r'\b' + re.escape(term.lower()) + r'(?:s|,|\.|:|;)?\b'
         
-        # Find all occurrences of this term in the paragraph
-        start_pos = 0
-        while True:
-            pos = paragraph_lower.find(term_lower, start_pos)
-            if pos == -1:
-                break
-            
-            # Add this occurrence to our list
-            term_occurrences.append((pos, pos + len(term), term, color))
-            start_pos = pos + len(term)
+        # Find all matches in the paragraph
+        for match in re.finditer(pattern, paragraph.lower()):
+            start, end = match.span()
+            # Get the actual text as it appears in the original paragraph
+            actual_text = paragraph[start:end]
+            term_occurrences.append((start, end, actual_text, color))
     
     # Sort occurrences by position
     term_occurrences.sort(key=lambda x: x[0])
