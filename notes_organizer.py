@@ -25,10 +25,8 @@ def extract_key_terms(keyterms_content):
     key_terms = []
     for line in keyterms_content.splitlines():
         line = line.strip()
-        if line and ':' in line:
-            term = line.split(':', 1)[0].strip()
-            if term:
-                key_terms.append(term)
+        if line:  # Just check if the line is not empty
+            key_terms.append(line)
     return key_terms
 
 def find_term_in_notes(notes_content, term):
