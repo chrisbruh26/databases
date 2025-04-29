@@ -317,6 +317,117 @@ def add_term():
     except Exception as e:
         print(f"Error adding term: {e}")
 
+def update_term():
+    """Update an existing term in keyterms.txt."""
+    # Read the current terms
+    keyterms_content = read_file("keyterms.txt")
+    if not keyterms_content:
+        print("Error: Could not read keyterms.txt")
+        return
+        
+    # Extract terms and their metadata
+    all_terms, term_definitions, term_categories = extract_key_terms(keyterms_content)
+    
+    if not all_terms:
+        print("No terms found in keyterms.txt")
+        return
+    
+    # Display available terms
+    print("Available terms:")
+    terms_per_row = 3
+    for i in range(0, len(all_terms), terms_per_row):
+        row_terms = all_terms[i:i+terms_per_row]
+        print("  ".join(f"{term:<20}" for term in row_terms))
+    
+    # Ask which term to update
+    term_to_update = input("\nEnter the term to update: ").strip()
+    if not term_to_update:
+        print("No term specified.")
+        return
+    
+    # Find the closest match if exact match not found
+    if term_to_update not in all_terms:
+        matches = [t for t in all_terms if term_to_update.lower() in t.lower()]
+        if matches:
+            print(f"Exact match not found. Did you mean one of these?")
+            for i, match in enumerate(matches, 1):
+                print(f"  {i}. {match}")
+            try:
+                choice = int(input("\nSelect a term (number) or 0 to cancel: "))
+                if 1 <= choice <= len(matches):
+                    term_to_update = matches[choice-1]
+                else:
+                    print("Operation cancelled.")
+                    return
+            except ValueError:
+                print("Invalid input. Operation cancelled.")
+                return
+        else:
+            print(f"No term found containing '{term_to_update}'.")
+            return
+    
+    # Show current definition and category if they exist
+    current_definition = term_definitions.get(term_to_update, "")
+    current_category = term_categories.get(term_to_update, "")
+    
+    print(f"\nUpdating term: {term_to_update}")
+    if current_definition:
+        print(f"Current definition: {current_definition}")
+    if current_category:
+        print(f"Current category: {current_category}")
+    
+    # Get new values
+    new_definition = input(f"Enter new definition (leave empty to {'keep current' if current_definition else 'skip'}): ").strip()
+    new_category = input(f"Enter new category (leave empty to {'keep current' if current_category else 'skip'}): ").strip()
+    
+    # Use current values if new ones are not provided
+    if not new_definition and current_definition:
+        new_definition = current_definition
+    if not new_category and current_category:
+        new_category = current_category
+    
+    # Read all lines from the file
+    try:
+        with open("keyterms.txt", 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+        
+        # Find and update the line containing the term
+        updated = False
+        for i, line in enumerate(lines):
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Parse the line to extract the term
+            parsed_line = line
+            if '#' in parsed_line:
+                parsed_line = parsed_line.split('#', 1)[0]
+            
+            term = parsed_line.split(':', 1)[0].strip() if ':' in parsed_line else parsed_line.strip()
+            
+            if term == term_to_update:
+                # Construct the updated line
+                updated_line = term_to_update
+                if new_definition:
+                    updated_line += f": {new_definition}"
+                if new_category:
+                    updated_line += f"#{new_category}"
+                
+                lines[i] = updated_line + '\n'
+                updated = True
+                break
+        
+        if updated:
+            # Write the updated content back to the file
+            with open("keyterms.txt", 'w', encoding='utf-8') as file:
+                file.writelines(lines)
+            print(f"Term '{term_to_update}' updated successfully!")
+        else:
+            print(f"Could not find term '{term_to_update}' in the file. This is unexpected.")
+            
+    except Exception as e:
+        print(f"Error updating term: {e}")
+
 def quiz_mode(num_questions=5):
     """Quiz the user on random terms."""
     import random
@@ -417,12 +528,13 @@ def interactive_mode():
     print("  2. Filter by specific terms")
     print("  3. Filter by category")
     print("  4. Add new term")
-    print("  5. Quiz mode")
-    print("  6. Study session by category")
-    print("  7. Exit")
+    print("  5. Update existing term")
+    print("  6. Quiz mode")
+    print("  7. Study session by category")
+    print("  8. Exit")
     
     while True:
-        choice = input("\nEnter your choice (1-7): ").strip()
+        choice = input("\nEnter your choice (1-8): ").strip()
         
         if choice == '1':
             organize_notes_by_key_terms()
@@ -438,15 +550,17 @@ def interactive_mode():
         elif choice == '4':
             add_term()
         elif choice == '5':
+            update_term()
+        elif choice == '6':
             try:
                 num = int(input("How many questions? (default: 5): ") or "5")
                 quiz_mode(num)
             except ValueError:
                 print("Please enter a valid number. Using default of 5 questions.")
                 quiz_mode(5)
-        elif choice == '6':
-            study_session()
         elif choice == '7':
+            study_session()
+        elif choice == '8':
             print("Exiting...")
             sys.exit(0)
         else:
@@ -462,11 +576,14 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--category", help="Filter by category")
     parser.add_argument("-q", "--quiz", type=int, help="Run quiz mode with specified number of questions")
     parser.add_argument("-a", "--add", action="store_true", help="Add a new term")
+    parser.add_argument("-u", "--update", action="store_true", help="Update an existing term")
     
     args = parser.parse_args()
     
     if args.add:
         add_term()
+    elif args.update:
+        update_term()
     elif args.quiz:
         quiz_mode(args.quiz)
     elif args.terms or args.category:
