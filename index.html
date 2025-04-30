@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes Organizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Notes Organizer</h1>
+            <p>A study tool for organizing and learning key terms</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="search">Search & View</button>
+            <button class="tab-btn" data-tab="manage">Manage Terms</button>
+            <button class="tab-btn" data-tab="quiz">Quiz Mode</button>
+            <button class="tab-btn" data-tab="study">Study Session</button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Search & View Tab -->
+            <div id="search" class="tab-pane active">
+                <div class="search-controls">
+                    <div class="filter-section">
+                        <h3>Filter Options</h3>
+                        <div class="filter-row">
+                            <label for="filter-terms">Filter by Terms:</label>
+                            <input type="text" id="filter-terms" placeholder="Enter terms (comma-separated)">
+                        </div>
+                        <div class="filter-row">
+                            <label for="filter-category">Filter by Category:</label>
+                            <input type="text" id="filter-category" placeholder="Enter category">
+                        </div>
+                        <button id="apply-filters">Apply Filters</button>
+                        <button id="clear-filters">Clear Filters</button>
+                    </div>
+                    <div class="file-section">
+                        <h3>File Management</h3>
+                        <div class="file-row">
+                            <label for="notes-file">Notes File:</label>
+                            <input type="file" id="notes-file" accept=".txt">
+                        </div>
+                        <div class="file-row">
+                            <label for="keyterms-file">Key Terms File:</label>
+                            <input type="file" id="keyterms-file" accept=".txt">
+                        </div>
+                        <div class="file-row">
+                            <label for="definitions-file">Definitions File:</label>
+                            <input type="file" id="definitions-file" accept=".txt">
+                        </div>
+                        <div class="file-row">
+                            <label for="learning-objectives-file">Learning Objectives File:</label>
+                            <input type="file" id="learning-objectives-file" accept=".txt">
+                        </div>
+                        <button id="load-files">Load Files</button>
+                        <button id="save-files">Save Files</button>
+                    </div>
+                </div>
+
+                <div class="results-section">
+                    <div class="terms-list">
+                        <h3>Key Terms</h3>
+                        <div id="terms-container" class="scrollable"></div>
+                    </div>
+                    <div class="term-contexts">
+                        <h3>Term Contexts</h3>
+                        <div id="contexts-container" class="scrollable"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Terms Tab -->
+            <div id="manage" class="tab-pane">
+                <div class="manage-section">
+                    <div class="add-term">
+                        <h3>Add New Term</h3>
+                        <div class="form-row">
+                            <label for="new-term">Term:</label>
+                            <input type="text" id="new-term" placeholder="Enter new term">
+                        </div>
+                        <div class="form-row">
+                            <label for="new-definition">Definition:</label>
+                            <textarea id="new-definition" placeholder="Enter definition (optional)"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <label for="new-category">Category:</label>
+                            <input type="text" id="new-category" placeholder="Enter category (optional)">
+                        </div>
+                        <div class="form-row">
+                            <label>Additional Information:</label>
+                            <div id="additional-info-container">
+                                <div class="additional-info-row">
+                                    <input type="text" class="additional-info" placeholder="Enter additional information">
+                                    <button class="remove-info">Remove</button>
+                                </div>
+                            </div>
+                            <button id="add-info-field">Add More Information</button>
+                        </div>
+                        <button id="save-new-term">Save Term</button>
+                    </div>
+
+                    <div class="update-term">
+                        <h3>Update Existing Term</h3>
+                        <div class="form-row">
+                            <label for="term-to-update">Select Term:</label>
+                            <select id="term-to-update">
+                                <option value="">-- Select a term --</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="update-definition">Definition:</label>
+                            <textarea id="update-definition" placeholder="Enter updated definition"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <label for="update-category">Category:</label>
+                            <input type="text" id="update-category" placeholder="Enter updated category">
+                        </div>
+                        <div class="form-row">
+                            <label>Additional Information:</label>
+                            <div id="update-info-container">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                            <button id="add-update-info-field">Add More Information</button>
+                        </div>
+                        <button id="save-updated-term">Update Term</button>
+                    </div>
+                </div>
+                
+                <!-- Image Management Section -->
+                <div class="image-management">
+                    <h3>Manage Images</h3>
+                    <div class="form-row">
+                        <label for="image-upload">Upload Image:</label>
+                        <input type="file" id="image-upload" accept="image/*">
+                    </div>
+                    <div class="form-row">
+                        <label for="image-title">Image Title:</label>
+                        <input type="text" id="image-title" placeholder="Enter a title for this image">
+                    </div>
+                    <div class="form-row">
+                        <label for="image-description">Description:</label>
+                        <textarea id="image-description" placeholder="Enter a description for this image (optional)"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label for="associated-terms">Associated Terms:</label>
+                        <textarea id="associated-terms" placeholder="Enter terms associated with this image (comma-separated)"></textarea>
+                        <p class="help-text">These terms will be linked to this image. When studying these terms, this image will be shown.</p>
+                    </div>
+                    <button id="save-image">Save Image</button>
+                    
+                    <div class="saved-images">
+                        <h4>Saved Images</h4>
+                        <div id="images-list" class="scrollable">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Mode Tab -->
+            <div id="quiz" class="tab-pane">
+                <div class="quiz-setup">
+                    <h3>Quiz Setup</h3>
+                    <div class="form-row">
+                        <label for="quiz-questions">Number of Questions:</label>
+                        <input type="number" id="quiz-questions" min="1" value="5">
+                    </div>
+                    <div class="form-row">
+                        <label for="quiz-category">Filter by Category (optional):</label>
+                        <input type="text" id="quiz-category" placeholder="Enter category">
+                    </div>
+                    <button id="start-quiz">Start Quiz</button>
+                </div>
+
+                <div class="quiz-area" style="display: none;">
+                    <div class="quiz-question">
+                        <h3 id="question-number">Question 1</h3>
+                        <p id="question-text">Define 'term'</p>
+                        <p id="question-hint" class="hint"></p>
+                        <button id="show-answer">Show Answer</button>
+                    </div>
+
+                    <div class="quiz-answer" style="display: none;">
+                        <h4>Definition:</h4>
+                        <p id="answer-definition"></p>
+                        <div id="answer-additional-info"></div>
+                        <div class="self-assessment">
+                            <p>Did you know this?</p>
+                            <button class="assessment-btn" data-value="y">Yes</button>
+                            <button class="assessment-btn" data-value="partial">Partially</button>
+                            <button class="assessment-btn" data-value="n">No</button>
+                        </div>
+                    </div>
+
+                    <div class="quiz-navigation" style="display: none;">
+                        <button id="next-question">Next Question</button>
+                    </div>
+
+                    <div class="quiz-results" style="display: none;">
+                        <h3>Quiz Results</h3>
+                        <p id="quiz-score"></p>
+                        <p id="quiz-feedback"></p>
+                        <button id="review-missed">Review Missed Terms</button>
+                        <button id="restart-quiz">Restart Quiz</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Study Session Tab -->
+            <div id="study" class="tab-pane">
+                <div class="study-options">
+                    <h3>Study Options</h3>
+                    <div class="option-buttons">
+                        <button id="study-by-category">Study by Category</button>
+                        <button id="study-with-definitions">Study Terms with Definitions</button>
+                        <button id="study-with-additional-info">Study Terms with Additional Info</button>
+                        <button id="study-by-frequency">Study Terms by Frequency in Notes</button>
+                        <button id="study-learning-objectives">Practice Learning Objectives</button>
+                    </div>
+                </div>
+
+                <div class="category-selection" style="display: none;">
+                    <h3>Select Category</h3>
+                    <div id="categories-list" class="scrollable"></div>
+                    <button id="back-to-study-options">Back</button>
+                </div>
+
+                <div class="frequency-selection" style="display: none;">
+                    <h3>Terms by Frequency</h3>
+                    <div id="frequency-list" class="scrollable"></div>
+                    <div class="form-row">
+                        <label for="top-terms">Number of top terms to study:</label>
+                        <input type="number" id="top-terms" min="1" value="5">
+                    </div>
+                    <button id="study-top-terms">Study Selected Terms</button>
+                    <button id="back-from-frequency">Back</button>
+                </div>
+
+                <div class="study-session-content" style="display: none;">
+                    <h3 id="study-session-title">Study Session</h3>
+                    <div id="study-terms-list" class="scrollable"></div>
+                    <div id="study-content" class="scrollable"></div>
+                    <button id="back-from-study-session">Back to Options</button>
+                </div>
+                
+                <div class="learning-objectives-quiz" style="display: none;">
+                    <h3>Learning Objectives Practice</h3>
+                    
+                    <div class="learning-objective-question">
+                        <p id="objective-number">Objective 1 of 10</p>
+                        <p id="objective-text" class="objective-text"></p>
+                        
+                        <div class="objective-response">
+                            <textarea id="objective-answer" placeholder="Type your answer here..."></textarea>
+                            <button id="check-objective">Check Understanding</button>
+                        </div>
+                    </div>
+                    
+                    <div class="objective-feedback" style="display: none;">
+                        <h4>Reflection</h4>
+                        <p>How well did you understand this learning objective?</p>
+                        <div class="understanding-buttons">
+                            <button class="understanding-btn" data-level="1">Not at all</button>
+                            <button class="understanding-btn" data-level="2">Somewhat</button>
+                            <button class="understanding-btn" data-level="3">Mostly</button>
+                            <button class="understanding-btn" data-level="4">Completely</button>
+                        </div>
+                        <div class="objective-navigation">
+                            <button id="prev-objective" disabled>Previous</button>
+                            <button id="next-objective">Next</button>
+                            <button id="finish-objectives" style="display: none;">Finish</button>
+                        </div>
+                    </div>
+                    
+                    <div class="objectives-results" style="display: none;">
+                        <h4>Learning Objectives Summary</h4>
+                        <div id="objectives-summary" class="scrollable"></div>
+                    </div>
+                    
+                    <button id="back-from-objectives" class="back-button">Back to Options</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
