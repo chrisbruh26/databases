@@ -184,19 +184,26 @@ function setupSearchAndFilter() {
     document.getElementById('apply-filters').addEventListener('click', () => {
         const filterTermsInput = document.getElementById('filter-terms').value;
         const filterCategory = document.getElementById('filter-category').value;
+        const searchWord = document.getElementById('search-word').value.trim();
         
         // Parse filter terms
         const filterTerms = filterTermsInput ? 
             filterTermsInput.split(',').map(term => term.trim()) : null;
         
-        // Apply filters and display results
-        organizeNotesByKeyTerms(filterTerms, filterCategory);
+        if (searchWord) {
+            // If a search word is provided, search for it in the notes
+            searchForWord(searchWord);
+        } else {
+            // Otherwise, apply filters and display results for key terms
+            organizeNotesByKeyTerms(filterTerms, filterCategory);
+        }
     });
     
     // Clear filters button
     document.getElementById('clear-filters').addEventListener('click', () => {
         document.getElementById('filter-terms').value = '';
         document.getElementById('filter-category').value = '';
+        document.getElementById('search-word').value = '';
         
         // Display all terms
         organizeNotesByKeyTerms();
@@ -579,8 +586,22 @@ function setupStudySession() {
         showObjectiveFeedback();
     });
     
+    document.getElementById('next-objective').addEventListener('click', () => {
+        if (currentObjectiveIndex < learningObjectives.length - 1) {
+            currentObjectiveIndex++;
+            showCurrentObjective();
+        }
+    });
+    
     document.getElementById('prev-objective').addEventListener('click', () => {
-        navigateObjectives(-1);
+        if (currentObjectiveIndex > 0) {
+            currentObjectiveIndex--;
+            showCurrentObjective();
+        }
+    });
+    
+    document.getElementById('finish-objectives').addEventListener('click', () => {
+        showObjectivesResults();
     });
     
     document.getElementById('next-objective').addEventListener('click', () => {
@@ -702,6 +723,117 @@ function processLearningObjectives() {
     
     // Log the number of learning objectives loaded
     console.log(`Loaded ${learningObjectives.length} learning objectives`);
+}
+
+// Start learning objectives quiz
+function startLearningObjectivesQuiz() {
+    if (!learningObjectives || learningObjectives.length === 0) {
+        alert('No learning objectives available. Please load a learning objectives file first.');
+        return;
+    }
+    
+    // Hide study options and show learning objectives quiz
+    document.querySelector('.study-options').style.display = 'none';
+    document.querySelector('.learning-objectives-quiz').style.display = 'block';
+    
+    // Reset quiz state
+    resetLearningObjectivesQuiz();
+    
+    // Initialize the first objective
+    showCurrentObjective();
+}
+
+// Reset learning objectives quiz state
+function resetLearningObjectivesQuiz() {
+    // Initialize quiz variables
+    currentObjectiveIndex = 0;
+    objectiveResponses = [];
+    
+    // Reset UI elements
+    document.getElementById('objective-answer').value = '';
+    document.querySelector('.objective-feedback').style.display = 'none';
+    document.querySelector('.objectives-results').style.display = 'none';
+    
+    // Reset navigation buttons
+    document.getElementById('prev-objective').disabled = true;
+    document.getElementById('next-objective').disabled = false;
+    document.getElementById('next-objective').style.display = 'inline-block';
+    document.getElementById('finish-objectives').style.display = 'none';
+}
+
+// Global variables for learning objectives quiz
+let currentObjectiveIndex = 0;
+let objectiveResponses = [];
+
+// Show current learning objective
+function showCurrentObjective() {
+    const objective = learningObjectives[currentObjectiveIndex];
+    const totalObjectives = learningObjectives.length;
+    
+    // Update objective number and text
+    document.getElementById('objective-number').textContent = `Objective ${currentObjectiveIndex + 1} of ${totalObjectives}`;
+    document.getElementById('objective-text').textContent = objective;
+    
+    // Clear answer field if no previous response
+    if (!objectiveResponses[currentObjectiveIndex]) {
+        document.getElementById('objective-answer').value = '';
+    } else {
+        document.getElementById('objective-answer').value = objectiveResponses[currentObjectiveIndex].answer;
+    }
+    
+    // Hide feedback section
+    document.querySelector('.objective-feedback').style.display = 'none';
+    
+    // Update navigation buttons
+    document.getElementById('prev-objective').disabled = currentObjectiveIndex === 0;
+    
+    // Show finish button on last objective, otherwise show next button
+    if (currentObjectiveIndex === totalObjectives - 1) {
+        document.getElementById('next-objective').style.display = 'none';
+        document.getElementById('finish-objectives').style.display = 'inline-block';
+    } else {
+        document.getElementById('next-objective').style.display = 'inline-block';
+        document.getElementById('finish-objectives').style.display = 'none';
+    }
+}
+
+// Show feedback for current objective
+function showObjectiveFeedback() {
+    const answer = document.getElementById('objective-answer').value.trim();
+    
+    if (!answer) {
+        alert('Please enter your answer before checking understanding.');
+        return;
+    }
+    
+    // Save the response
+    objectiveResponses[currentObjectiveIndex] = {
+        objective: learningObjectives[currentObjectiveIndex],
+        answer: answer,
+        understanding: null // Will be set when user clicks an understanding button
+    };
+    
+    // Show feedback section
+    document.querySelector('.objective-feedback').style.display = 'block';
+    
+    // Add event listeners to understanding buttons if not already added
+    document.querySelectorAll('.understanding-btn').forEach(button => {
+        // Remove existing listeners to prevent duplicates
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        // Add new listener
+        newButton.addEventListener('click', (e) => {
+            const level = parseInt(e.target.getAttribute('data-level'));
+            objectiveResponses[currentObjectiveIndex].understanding = level;
+            
+            // Highlight selected button
+            document.querySelectorAll('.understanding-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            e.target.classList.add('selected');
+        });
+    });
 }
 
 // Update term selection dropdown for the update term form
@@ -1920,4 +2052,193 @@ function loadSavedData() {
     } catch (e) {
         console.error('Error loading from localStorage:', e);
     }
+}
+
+// Search for any word in the notes
+function searchForWord(word) {
+    if (!notesContent) {
+        alert('No notes content available. Please load notes.txt first.');
+        return;
+    }
+    
+    if (!word) {
+        alert('Please enter a word to search for.');
+        return;
+    }
+    
+    // Find all occurrences of the word in the notes
+    const contexts = findWordInNotes(notesContent, word);
+    
+    if (contexts.length === 0) {
+        alert(`No occurrences of "${word}" found in the notes.`);
+        return;
+    }
+    
+    // Display the search results
+    displaySearchResults(word, contexts);
+}
+
+// Find a word in the notes and return the surrounding context
+function findWordInNotes(notesContent, word) {
+    // Create a regex pattern that matches the word
+    const pattern = new RegExp('\\b' + escapeRegExp(word.toLowerCase()) + '(?:s|,|\\.|:|;)?\\b', 'gi');
+    
+    // Find all occurrences of the word
+    const contexts = [];
+    const paragraphsFound = new Set(); // Track paragraphs we've already found
+    let match;
+    
+    while ((match = pattern.exec(notesContent.toLowerCase())) !== null) {
+        const pos = match.index;
+        
+        // Get context (paragraph containing the word)
+        // Find the start of the paragraph
+        let paraStart = notesContent.lastIndexOf('\n\n', pos);
+        if (paraStart === -1) {
+            paraStart = 0;
+        } else {
+            paraStart += 2; // Skip the newlines
+        }
+        
+        // Find the end of the paragraph
+        let paraEnd = notesContent.indexOf('\n\n', pos);
+        if (paraEnd === -1) {
+            paraEnd = notesContent.length;
+        }
+        
+        // Extract the paragraph
+        const paragraph = notesContent.substring(paraStart, paraEnd).trim();
+        
+        // Skip if we've already processed this paragraph
+        const paragraphKey = `${paraStart}-${paraEnd}`;
+        if (paragraphsFound.has(paragraphKey)) {
+            continue;
+        }
+        
+        // Mark this paragraph as found
+        paragraphsFound.add(paragraphKey);
+        
+        // Calculate the position of the term in the paragraph
+        const termPosInPara = notesContent.substring(paraStart, pos).length;
+        
+        // Add context with metadata
+        contexts.push({
+            text: paragraph,
+            position: termPosInPara
+        });
+    }
+    
+    return contexts;
+}
+
+// Display search results for a word
+function displaySearchResults(word, contexts) {
+    // Clear the terms container
+    const termsContainer = document.getElementById('terms-container');
+    termsContainer.innerHTML = `<p>Search results for "${word}":</p><p>Found ${contexts.length} occurrences in the notes.</p>`;
+    
+    // Display contexts in the contexts container
+    const contextsContainer = document.getElementById('contexts-container');
+    contextsContainer.innerHTML = '';
+    
+    // Create a card for the search results
+    const searchCard = document.createElement('div');
+    searchCard.className = 'term-card';
+    searchCard.innerHTML = `<h4>Search Results for "${word}"</h4>`;
+    
+    // Add each context
+    contexts.forEach((context, index) => {
+        // Highlight the search word in the context
+        const highlightedText = highlightWordInText(context.text, word);
+        
+        searchCard.innerHTML += `
+            <div class="context">
+                <h5>Result ${index + 1}</h5>
+                <p>${highlightedText}</p>
+            </div>
+        `;
+    });
+    
+    contextsContainer.appendChild(searchCard);
+}
+
+// Highlight a specific word in text
+function highlightWordInText(text, word) {
+    // Create a regex pattern that matches the word
+    const pattern = new RegExp('\\b(' + escapeRegExp(word) + ')(?:s|,|\\.|:|;)?\\b', 'gi');
+    
+    // Replace all occurrences with highlighted version
+    return text.replace(pattern, '<span class="term-highlight term-highlight-orange">$1</span>');
+}
+
+// Show objectives results
+function showObjectivesResults() {
+    // Hide question and feedback sections
+    document.querySelector('.learning-objective-question').style.display = 'none';
+    document.querySelector('.objective-feedback').style.display = 'none';
+    
+    // Show results section
+    document.querySelector('.objectives-results').style.display = 'block';
+    
+    // Generate summary
+    const summaryElement = document.getElementById('objectives-summary');
+    summaryElement.innerHTML = '';
+    
+    // Create summary table
+    const table = document.createElement('table');
+    table.className = 'objectives-summary-table';
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Learning Objective</th>
+                <th>Your Answer</th>
+                <th>Understanding Level</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+    
+    const tbody = table.querySelector('tbody');
+    
+    // Add rows for each objective
+    objectiveResponses.forEach((response, index) => {
+        const row = document.createElement('tr');
+        
+        // Determine understanding level text
+        let understandingText = 'Not assessed';
+        let understandingClass = '';
+        
+        if (response.understanding !== null) {
+            switch (response.understanding) {
+                case 1:
+                    understandingText = 'Not at all';
+                    understandingClass = 'understanding-low';
+                    break;
+                case 2:
+                    understandingText = 'Somewhat';
+                    understandingClass = 'understanding-medium-low';
+                    break;
+                case 3:
+                    understandingText = 'Mostly';
+                    understandingClass = 'understanding-medium-high';
+                    break;
+                case 4:
+                    understandingText = 'Completely';
+                    understandingClass = 'understanding-high';
+                    break;
+            }
+        }
+        
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${response.objective}</td>
+            <td>${response.answer}</td>
+            <td class="${understandingClass}">${understandingText}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+    
+    summaryElement.appendChild(table);
 }
