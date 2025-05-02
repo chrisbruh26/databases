@@ -592,6 +592,18 @@ textarea {
     cursor: move;
     user-select: none;
     z-index: 1;
+    transition: box-shadow 0.2s ease, transform 0.1s ease, opacity 0.3s ease;
+}
+
+.canvas-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.canvas-item.dragging {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: scale(1.02);
+    opacity: 0.9;
+    z-index: 10;
 }
 
 .canvas-item.term {
@@ -617,6 +629,7 @@ textarea {
     min-width: 200px;
     min-height: 150px;
     z-index: 0;
+    padding: 15px;
 }
 
 .canvas-connection {
@@ -625,6 +638,18 @@ textarea {
     background-color: #666;
     transform-origin: left center;
     z-index: 0;
+    transition: opacity 0.3s ease, background-color 0.2s ease;
+}
+
+.canvas-connection:hover {
+    background-color: #333;
+    height: 3px;
+}
+
+.temp-connection {
+    background-color: #999;
+    border-style: dashed;
+    opacity: 0.6;
 }
 
 .canvas-connection-label {
@@ -636,6 +661,18 @@ textarea {
     transform: translate(-50%, -50%);
     cursor: pointer;
     z-index: 1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease, opacity 0.3s ease;
+}
+
+.canvas-connection-label:hover {
+    background-color: #f0f0f0;
+}
+
+/* Delete animation */
+.deleting {
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Notes Tab */
