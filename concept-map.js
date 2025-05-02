@@ -20,6 +20,9 @@ function setupConceptMap() {
     // Populate category filter
     populateCategoryFilter();
     
+    // Set default active tool to move
+    activeTool = 'move';
+    
     // Set up event listeners for tools
     toolButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -29,19 +32,34 @@ function setupConceptMap() {
             // Set active tool
             const tool = button.getAttribute('data-tool');
             
-            if (activeTool === tool) {
-                // If clicking the same tool, deactivate it
-                activeTool = null;
+            if (activeTool === tool && tool !== 'move') {
+                // If clicking the same tool (except move), deactivate it and set move as default
+                activeTool = 'move';
+                document.getElementById('move-tool').classList.add('active');
                 isConnecting = false;
                 connectionStart = null;
+                
+                // Update cursor for canvas
+                canvas.style.cursor = 'default';
             } else {
                 // Activate the new tool
                 activeTool = tool;
                 button.classList.add('active');
                 
+                // Update cursor based on tool
                 if (tool === 'connection') {
                     isConnecting = true;
+                    canvas.style.cursor = 'crosshair';
+                } else if (tool === 'delete') {
+                    canvas.style.cursor = 'no-drop';
+                } else if (tool === 'move') {
+                    canvas.style.cursor = 'default';
                 } else {
+                    canvas.style.cursor = 'pointer';
+                }
+                
+                // Reset connection state if not using connection tool
+                if (tool !== 'connection') {
                     isConnecting = false;
                     connectionStart = null;
                 }
@@ -208,6 +226,11 @@ function setupCanvasEventListeners() {
     canvas.addEventListener('drop', (e) => {
         e.preventDefault();
         
+        // Only allow drops when using move tool
+        if (activeTool !== 'move') {
+            return;
+        }
+        
         const text = e.dataTransfer.getData('text/plain');
         const itemType = e.dataTransfer.getData('itemType');
         const termForDefinition = e.dataTransfer.getData('termForDefinition');
@@ -225,26 +248,87 @@ function setupCanvasEventListeners() {
     
     // Handle click event for canvas
     canvas.addEventListener('click', (e) => {
-        // If text tool is active, create a text box
-        if (activeTool === 'text') {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            const text = prompt('Enter text:');
-            if (text) {
-                createCanvasItem(text, x, y, 'text');
+        // Check if we clicked on an item or connection
+        const target = e.target;
+        if (target !== canvas) {
+            // If using delete tool and clicked on a connection
+            if (activeTool === 'delete' && target.classList.contains('canvas-connection')) {
+                deleteConnection(target);
             }
+            return;
         }
         
-        // If group tool is active, create a group box
-        else if (activeTool === 'group') {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+        // Handle canvas clicks based on active tool
+        switch (activeTool) {
+            case 'text':
+                // Create a text box
+                const textX = e.clientX - canvas.getBoundingClientRect().left;
+                const textY = e.clientY - canvas.getBoundingClientRect().top;
+                
+                const text = prompt('Enter text:');
+                if (text) {
+                    createCanvasItem(text, textX, textY, 'text');
+                }
+                break;
+                
+            case 'group':
+                // Create a group box
+                const groupX = e.clientX - canvas.getBoundingClientRect().left;
+                const groupY = e.clientY - canvas.getBoundingClientRect().top;
+                
+                const groupName = prompt('Enter group name (optional):');
+                createCanvasItem(groupName || 'Group', groupX, groupY, 'group');
+                break;
+                
+            case 'connection':
+                // Reset connection if clicking on canvas
+                isConnecting = false;
+                connectionStart = null;
+                break;
+        }
+    });
+    
+    // Add event listener for connection visualization
+    canvas.addEventListener('mousemove', (e) => {
+        // If we're in the process of creating a connection
+        if (isConnecting && connectionStart) {
+            // Remove any temporary connection line
+            const tempLine = document.getElementById('temp-connection');
+            if (tempLine) {
+                tempLine.remove();
+            }
             
-            const groupName = prompt('Enter group name (optional):');
-            createCanvasItem(groupName || 'Group', x, y, 'group');
+            // Create temporary connection line
+            const startRect = connectionStart.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            // Calculate start point (center of the start item)
+            const startX = startRect.left + startRect.width / 2 - canvasRect.left;
+            const startY = startRect.top + startRect.height / 2 - canvasRect.top;
+            
+            // Calculate end point (current mouse position)
+            const endX = e.clientX - canvasRect.left;
+            const endY = e.clientY - canvasRect.top;
+            
+            // Calculate distance and angle
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            // Create temporary connection element
+            const tempConnection = document.createElement('div');
+            tempConnection.className = 'canvas-connection temp-connection';
+            tempConnection.id = 'temp-connection';
+            
+            // Position and rotate connection
+            tempConnection.style.width = `${distance}px`;
+            tempConnection.style.left = `${startX}px`;
+            tempConnection.style.top = `${startY}px`;
+            tempConnection.style.transform = `rotate(${angle}deg)`;
+            
+            // Add to canvas
+            canvas.appendChild(tempConnection);
         }
     });
 }
@@ -290,41 +374,55 @@ function createCanvasItem(text, x, y, itemType, termForDefinition = null) {
 
 // Set up event listeners for canvas items
 function setupItemEventListeners(item) {
-    // Mouse down event for dragging
+    // Mouse down event for dragging or tool actions
     item.addEventListener('mousedown', (e) => {
         // Prevent default behavior
         e.preventDefault();
         
-        // If connection tool is active, handle connection
-        if (activeTool === 'connection') {
-            if (!isConnecting || !connectionStart) {
-                // Start connection
-                connectionStart = item;
-                isConnecting = true;
-            } else {
-                // Complete connection
-                createConnection(connectionStart, item);
-                connectionStart = null;
-                isConnecting = false;
-            }
-            return;
+        // Handle different tools
+        switch (activeTool) {
+            case 'connection':
+                // Handle connection tool
+                if (!isConnecting || !connectionStart) {
+                    // Start connection
+                    connectionStart = item;
+                    isConnecting = true;
+                } else {
+                    // Complete connection
+                    createConnection(connectionStart, item);
+                    connectionStart = null;
+                    isConnecting = false;
+                }
+                return;
+                
+            case 'delete':
+                // Handle delete tool
+                deleteCanvasItem(item);
+                return;
+                
+            case 'move':
+            default:
+                // Handle move tool (default)
+                // Start dragging
+                isDragging = true;
+                draggedItem = item;
+                
+                // Calculate drag offset
+                const rect = item.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+                
+                // Add active class
+                item.classList.add('dragging');
+                break;
         }
-        
-        // Start dragging
-        isDragging = true;
-        draggedItem = item;
-        
-        // Calculate drag offset
-        const rect = item.getBoundingClientRect();
-        dragOffset.x = e.clientX - rect.left;
-        dragOffset.y = e.clientY - rect.top;
-        
-        // Add active class
-        item.classList.add('dragging');
     });
     
     // Double click to edit text
     item.addEventListener('dblclick', (e) => {
+        // Only allow editing if using move tool
+        if (activeTool !== 'move') return;
+        
         const newText = prompt('Edit text:', item.textContent);
         if (newText !== null) {
             item.textContent = newText;
@@ -338,24 +436,26 @@ function setupItemEventListeners(item) {
         }
     });
     
-    // Context menu for delete
+    // Context menu for delete (right-click)
     item.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-        
-        if (confirm('Delete this item?')) {
-            // Remove connections involving this item
-            const itemId = item.getAttribute('id');
-            removeConnectionsForItem(itemId);
-            
-            // Remove item from items array
-            const itemIndex = conceptMapItems.findIndex(i => i.id === itemId);
-            if (itemIndex !== -1) {
-                conceptMapItems.splice(itemIndex, 1);
-            }
-            
-            // Remove item from canvas
-            item.remove();
+        deleteCanvasItem(item);
+    });
+    
+    // Mouse over event to show delete cursor when using delete tool
+    item.addEventListener('mouseover', () => {
+        if (activeTool === 'delete') {
+            item.style.cursor = 'no-drop';
+        } else if (activeTool === 'connection') {
+            item.style.cursor = 'crosshair';
+        } else {
+            item.style.cursor = 'move';
         }
+    });
+    
+    // Mouse out event to reset cursor
+    item.addEventListener('mouseout', () => {
+        item.style.cursor = '';
     });
 }
 
@@ -459,34 +559,109 @@ function drawConnection(connectionData) {
         
         // Add event listener for label edit
         label.addEventListener('dblclick', (e) => {
+            // Only allow editing if using move tool
+            if (activeTool !== 'move') return;
+            
             const newLabel = prompt('Edit connection label:', connectionData.label);
             if (newLabel !== null) {
                 connectionData.label = newLabel;
                 label.textContent = newLabel;
             }
         });
+        
+        // Add event listener for delete tool
+        label.addEventListener('click', (e) => {
+            if (activeTool === 'delete') {
+                deleteConnection(connection);
+            }
+        });
+        
+        // Update cursor based on active tool
+        label.addEventListener('mouseover', () => {
+            if (activeTool === 'delete') {
+                label.style.cursor = 'no-drop';
+            } else if (activeTool === 'move') {
+                label.style.cursor = 'pointer';
+            } else {
+                label.style.cursor = '';
+            }
+        });
     }
     
-    // Add event listener for connection delete
+    // Add event listener for connection delete with right-click
     connection.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-        
-        if (confirm('Delete this connection?')) {
-            // Remove connection from connections array
-            const connectionIndex = conceptMapConnections.findIndex(conn => conn.id === connectionData.id);
-            if (connectionIndex !== -1) {
-                conceptMapConnections.splice(connectionIndex, 1);
-            }
-            
-            // Remove label if it exists
-            if (connectionData.labelElement) {
-                connectionData.labelElement.remove();
-            }
-            
-            // Remove connection from canvas
-            connection.remove();
+        deleteConnection(connection);
+    });
+    
+    // Add event listener for delete tool
+    connection.addEventListener('click', (e) => {
+        if (activeTool === 'delete') {
+            deleteConnection(connection);
         }
     });
+    
+    // Update cursor based on active tool
+    connection.addEventListener('mouseover', () => {
+        if (activeTool === 'delete') {
+            connection.style.cursor = 'no-drop';
+        } else {
+            connection.style.cursor = '';
+        }
+    });
+    
+    return connection;
+}
+
+// Delete a connection
+function deleteConnection(connectionElement) {
+    const connectionId = connectionElement.getAttribute('id');
+    
+    // Find the connection data
+    const connectionData = conceptMapConnections.find(conn => conn.id === connectionId);
+    
+    if (!connectionData) return;
+    
+    // Remove connection from connections array
+    const connectionIndex = conceptMapConnections.findIndex(conn => conn.id === connectionId);
+    if (connectionIndex !== -1) {
+        conceptMapConnections.splice(connectionIndex, 1);
+    }
+    
+    // Remove label if it exists
+    if (connectionData.labelElement) {
+        connectionData.labelElement.classList.add('deleting');
+        setTimeout(() => {
+            connectionData.labelElement.remove();
+        }, 300);
+    }
+    
+    // Remove connection from canvas with fade-out effect
+    connectionElement.classList.add('deleting');
+    setTimeout(() => {
+        connectionElement.remove();
+    }, 300);
+}
+
+// Delete a canvas item
+function deleteCanvasItem(item) {
+    // Get item ID
+    const itemId = item.getAttribute('id');
+    
+    // Remove connections involving this item
+    removeConnectionsForItem(itemId);
+    
+    // Remove item from items array
+    const itemIndex = conceptMapItems.findIndex(i => i.id === itemId);
+    if (itemIndex !== -1) {
+        conceptMapItems.splice(itemIndex, 1);
+    }
+    
+    // Remove item from canvas with a fade-out effect
+    item.classList.add('deleting');
+    setTimeout(() => {
+        item.remove();
+    }, 300);
 }
 
 // Remove connections for a specific item
@@ -501,12 +676,18 @@ function removeConnectionsForItem(itemId) {
         // Remove connection element
         const connectionElement = document.getElementById(conn.id);
         if (connectionElement) {
-            connectionElement.remove();
+            connectionElement.classList.add('deleting');
+            setTimeout(() => {
+                connectionElement.remove();
+            }, 300);
         }
         
         // Remove label element if it exists
         if (conn.labelElement) {
-            conn.labelElement.remove();
+            conn.labelElement.classList.add('deleting');
+            setTimeout(() => {
+                conn.labelElement.remove();
+            }, 300);
         }
         
         // Remove connection from connections array
