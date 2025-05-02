@@ -131,6 +131,27 @@ textarea {
     margin-bottom: 10px;
 }
 
+.bulk-upload-progress {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+}
+
+.progress-bar {
+    height: 10px;
+    background-color: #ddd;
+    border-radius: 5px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #3498db;
+    transition: width 0.3s ease;
+}
+
 .results-section {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -256,6 +277,49 @@ textarea {
     padding: 15px;
     background-color: #f8f9fa;
     border-radius: 8px;
+}
+
+.image-upload-tabs {
+    display: flex;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.image-tab-btn {
+    padding: 8px 15px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.image-tab-btn.active {
+    background-color: #fff;
+    border-bottom: 1px solid #fff;
+    margin-bottom: -1px;
+}
+
+.image-tab-pane {
+    display: none;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 0 5px 5px 5px;
+}
+
+.image-tab-pane.active {
+    display: block;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.checkbox-row input[type="checkbox"] {
+    margin-right: 8px;
 }
 
 .help-text {
