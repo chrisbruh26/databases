@@ -95,9 +95,13 @@ function setupFileInputs() {
         const keytermsFile = document.getElementById('keyterms-file').files[0];
         const definitionsFile = document.getElementById('definitions-file').files[0];
         const learningObjectivesFile = document.getElementById('learning-objectives-file').files[0];
+        const bulkNotesFiles = document.getElementById('bulk-notes-files').files;
+        
+        let filesLoaded = false;
         
         // Load notes file
         if (notesFile) {
+            filesLoaded = true;
             const notesReader = new FileReader();
             notesReader.onload = (e) => {
                 notesContent = e.target.result;
@@ -109,6 +113,7 @@ function setupFileInputs() {
         
         // Load keyterms file
         if (keytermsFile) {
+            filesLoaded = true;
             const keytermsReader = new FileReader();
             keytermsReader.onload = (e) => {
                 keytermsContent = e.target.result;
@@ -121,6 +126,7 @@ function setupFileInputs() {
         
         // Load definitions file
         if (definitionsFile) {
+            filesLoaded = true;
             const definitionsReader = new FileReader();
             definitionsReader.onload = (e) => {
                 definitionsContent = e.target.result;
@@ -133,6 +139,7 @@ function setupFileInputs() {
         
         // Load learning objectives file
         if (learningObjectivesFile) {
+            filesLoaded = true;
             const learningObjectivesReader = new FileReader();
             learningObjectivesReader.onload = (e) => {
                 learningObjectivesContent = e.target.result;
@@ -143,11 +150,87 @@ function setupFileInputs() {
             learningObjectivesReader.readAsText(learningObjectivesFile);
         }
         
+        // Load bulk notes files
+        if (bulkNotesFiles.length > 0) {
+            filesLoaded = true;
+            loadBulkNotesFiles(bulkNotesFiles);
+        }
+        
         // If no files selected, show error
-        if (!notesFile && !keytermsFile && !definitionsFile && !learningObjectivesFile) {
+        if (!filesLoaded) {
             alert('Please select at least one file to load.');
         }
     });
+    
+    // Function to load multiple notes files
+    function loadBulkNotesFiles(files) {
+        let loadedCount = 0;
+        let combinedContent = notesContent || '';
+        
+        // Create a progress indicator
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'bulk-upload-progress';
+        progressContainer.innerHTML = `
+            <p>Loading files: <span id="files-progress">0/${files.length}</span></p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+        `;
+        document.querySelector('.file-section').appendChild(progressContainer);
+        
+        const updateProgress = () => {
+            const progressSpan = document.getElementById('files-progress');
+            const progressFill = progressContainer.querySelector('.progress-fill');
+            
+            progressSpan.textContent = `${loadedCount}/${files.length}`;
+            const percentage = (loadedCount / files.length) * 100;
+            progressFill.style.width = `${percentage}%`;
+        };
+        
+        // Process each file sequentially
+        const processNextFile = (index) => {
+            if (index >= files.length) {
+                // All files processed
+                notesContent = combinedContent;
+                saveToLocalStorage('notesContent', notesContent);
+                
+                // Remove progress indicator
+                progressContainer.remove();
+                
+                alert(`Successfully loaded ${files.length} notes files!`);
+                return;
+            }
+            
+            const file = files[index];
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                // Add a separator between files
+                if (combinedContent && e.target.result) {
+                    combinedContent += '\n\n--- ' + file.name + ' ---\n\n';
+                }
+                
+                combinedContent += e.target.result;
+                loadedCount++;
+                updateProgress();
+                
+                // Process next file
+                processNextFile(index + 1);
+            };
+            
+            reader.onerror = () => {
+                alert(`Error reading file: ${file.name}`);
+                loadedCount++;
+                updateProgress();
+                processNextFile(index + 1);
+            };
+            
+            reader.readAsText(file);
+        };
+        
+        // Start processing files
+        processNextFile(0);
+    }
     
     // Save files button
     document.getElementById('save-files').addEventListener('click', () => {
@@ -1772,7 +1855,24 @@ function saveToLocalStorage(key, value) {
 
 // Image management setup
 function setupImageManagement() {
-    // Save image button
+    // Set up image tabs
+    const imageTabButtons = document.querySelectorAll('.image-tab-btn');
+    const imageTabPanes = document.querySelectorAll('.image-tab-pane');
+    
+    imageTabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons and panes
+            imageTabButtons.forEach(btn => btn.classList.remove('active'));
+            imageTabPanes.forEach(pane => pane.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding pane
+            button.classList.add('active');
+            const tabId = button.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+    
+    // Save single image button
     document.getElementById('save-image').addEventListener('click', () => {
         const imageFile = document.getElementById('image-upload').files[0];
         const imageTitle = document.getElementById('image-title').value.trim();
@@ -1832,16 +1932,140 @@ function setupImageManagement() {
             document.getElementById('image-title').value = '';
             document.getElementById('image-description').value = '';
             document.getElementById('associated-terms').value = '';
-            
-            alert('Image saved successfully!');
         };
         
         reader.readAsDataURL(imageFile);
     });
     
+    // Save bulk images button
+    document.getElementById('save-bulk-images').addEventListener('click', () => {
+        const imageFiles = document.getElementById('bulk-image-upload').files;
+        const commonTermsText = document.getElementById('bulk-associated-terms').value.trim();
+        const useFilenamesAsTitles = document.getElementById('custom-titles').checked;
+        
+        if (imageFiles.length === 0) {
+            alert('Please select at least one image to upload.');
+            return;
+        }
+        
+        if (!commonTermsText) {
+            alert('Please enter at least one term to associate with these images.');
+            return;
+        }
+        
+        // Parse common terms
+        const commonTerms = commonTermsText.split(',')
+            .map(term => term.trim())
+            .filter(term => term);
+        
+        // Create a progress indicator
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'bulk-upload-progress';
+        progressContainer.innerHTML = `
+            <p>Uploading images: <span id="images-progress">0/${imageFiles.length}</span></p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+        `;
+        document.getElementById('bulk-images').appendChild(progressContainer);
+        
+        let uploadedCount = 0;
+        
+        const updateProgress = () => {
+            const progressSpan = document.getElementById('images-progress');
+            const progressFill = progressContainer.querySelector('.progress-fill');
+            
+            progressSpan.textContent = `${uploadedCount}/${imageFiles.length}`;
+            const percentage = (uploadedCount / imageFiles.length) * 100;
+            progressFill.style.width = `${percentage}%`;
+        };
+        
+        // Process each image file
+        const processNextImage = (index) => {
+            if (index >= imageFiles.length) {
+                // All images processed
+                progressContainer.remove();
+                alert(`Successfully uploaded ${imageFiles.length} images!`);
+                
+                // Update images list
+                displaySavedImages();
+                
+                // Clear form
+                document.getElementById('bulk-image-upload').value = '';
+                document.getElementById('bulk-associated-terms').value = '';
+                return;
+            }
+            
+            const file = imageFiles[index];
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                const imageData = e.target.result;
+                
+                // Generate title from filename if option is checked
+                let imageTitle = '';
+                if (useFilenamesAsTitles) {
+                    // Remove file extension
+                    imageTitle = file.name.replace(/\.[^/.]+$/, "");
+                } else {
+                    // Use index-based title
+                    imageTitle = `Image ${index + 1}`;
+                }
+                
+                // Create image object
+                const imageObject = {
+                    id: Date.now().toString() + index, // Use timestamp + index as unique ID
+                    title: imageTitle,
+                    description: '', // No description for bulk uploads
+                    data: imageData,
+                    terms: commonTerms
+                };
+                
+                // Associate image with terms
+                commonTerms.forEach(term => {
+                    if (!termImages[term]) {
+                        termImages[term] = [];
+                    }
+                    termImages[term].push(imageObject.id);
+                });
+                
+                // Save image to localStorage
+                saveImageToLocalStorage(imageObject);
+                
+                uploadedCount++;
+                updateProgress();
+                
+                // Process next image
+                processNextImage(index + 1);
+            };
+            
+            reader.onerror = () => {
+                alert(`Error reading image: ${file.name}`);
+                uploadedCount++;
+                updateProgress();
+                processNextImage(index + 1);
+            };
+            
+            reader.readAsDataURL(file);
+        };
+        
+        // Start processing images
+        processNextImage(0);
+    });
+            document.getElementById('image-upload').value = '';
+            document.getElementById('image-title').value = '';
+            document.getElementById('image-description').value = '';
+            document.getElementById('associated-terms').value = '';
+            
+            alert('Image saved successfully!');
+        };
+        
+        reader.readAsDataURL(imageFile);
+    
+    
     // Display saved images on load
     displaySavedImages();
-}
+
 
 // Display saved images
 function displaySavedImages() {
