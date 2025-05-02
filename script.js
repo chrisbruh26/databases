@@ -13,6 +13,22 @@ let quizCorrectAnswers = 0;
 let termImages = {}; // Object to store images associated with terms
 let learningObjectives = []; // Array to store learning objectives
 
+// Concept Map variables
+let conceptMapItems = []; // Array to store items on the concept map
+let conceptMapConnections = []; // Array to store connections between items
+let savedDiagrams = []; // Array to store saved diagrams
+let activeTool = null; // Currently active tool
+let isConnecting = false; // Flag for connection creation
+let connectionStart = null; // Starting element for connection
+let isDragging = false; // Flag for dragging
+let draggedItem = null; // Currently dragged item
+let dragOffset = { x: 0, y: 0 }; // Offset for dragging
+
+// Notes variables
+let notes = []; // Array to store all notes
+let activeNote = null; // Currently active note
+let lastSavedContent = ''; // Last saved content for change detection
+
 // Colors for term highlighting (same as in Python version)
 const colors = [
     { r: 255, g: 100, b: 0 },    // Orange
@@ -63,6 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Set up event listeners for study session
     setupStudySession();
+    
+    // Set up concept map functionality
+    setupConceptMap();
+    
+    // Set up notes functionality
+    setupNotes();
     
     // Check for saved data in localStorage
     loadSavedData();
