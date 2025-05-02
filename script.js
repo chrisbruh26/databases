@@ -1869,9 +1869,31 @@ function downloadFile(filename, content) {
 // Helper function to save data to localStorage
 function saveToLocalStorage(key, value) {
     try {
-        localStorage.setItem(key, value);
+        // Convert objects to JSON strings
+        const valueToStore = typeof value === 'object' ? JSON.stringify(value) : value;
+        localStorage.setItem(key, valueToStore);
     } catch (e) {
         console.error('Error saving to localStorage:', e);
+    }
+}
+
+// Helper function to get data from localStorage
+function getFromLocalStorage(key) {
+    try {
+        const item = localStorage.getItem(key);
+        
+        // Try to parse as JSON, return as is if not valid JSON
+        if (item) {
+            try {
+                return JSON.parse(item);
+            } catch (e) {
+                return item;
+            }
+        }
+        return null;
+    } catch (e) {
+        console.error('Error getting from localStorage:', e);
+        return null;
     }
 }
 
@@ -2181,16 +2203,16 @@ function displaySavedImages() {
 function saveImageToLocalStorage(imageObject) {
     try {
         // Get existing images
-        const existingImages = JSON.parse(localStorage.getItem('savedImages') || '[]');
+        const existingImages = getFromLocalStorage('savedImages') || [];
         
         // Add new image
         existingImages.push(imageObject);
         
         // Save back to localStorage
-        localStorage.setItem('savedImages', JSON.stringify(existingImages));
+        saveToLocalStorage('savedImages', existingImages);
         
         // Save term associations
-        localStorage.setItem('termImages', JSON.stringify(termImages));
+        saveToLocalStorage('termImages', termImages);
     } catch (e) {
         console.error('Error saving image to localStorage:', e);
     }
@@ -2199,7 +2221,7 @@ function saveImageToLocalStorage(imageObject) {
 // Get all saved images
 function getAllSavedImages() {
     try {
-        return JSON.parse(localStorage.getItem('savedImages') || '[]');
+        return getFromLocalStorage('savedImages') || [];
     } catch (e) {
         console.error('Error getting saved images:', e);
         return [];
@@ -2238,8 +2260,8 @@ function deleteImage(id) {
             const updatedImages = existingImages.filter(image => image.id !== id);
             
             // Save back to localStorage
-            localStorage.setItem('savedImages', JSON.stringify(updatedImages));
-            localStorage.setItem('termImages', JSON.stringify(termImages));
+            saveToLocalStorage('savedImages', updatedImages);
+            saveToLocalStorage('termImages', termImages);
         }
     } catch (e) {
         console.error('Error deleting image:', e);
@@ -2285,6 +2307,7 @@ function loadSavedData() {
         notesContent = localStorage.getItem('notesContent') || '';
         keytermsContent = localStorage.getItem('keytermsContent') || '';
         definitionsContent = localStorage.getItem('definitionsContent') || '';
+        learningObjectivesContent = localStorage.getItem('learningObjectivesContent') || '';
         
         // Load term images
         const savedTermImages = localStorage.getItem('termImages');
@@ -2292,8 +2315,24 @@ function loadSavedData() {
             termImages = JSON.parse(savedTermImages);
         }
         
+        // Load concept map data
+        const savedDiagramsData = localStorage.getItem('savedDiagrams');
+        if (savedDiagramsData) {
+            savedDiagrams = JSON.parse(savedDiagramsData);
+        }
+        
+        // Load notes data
+        const savedNotesData = localStorage.getItem('notes');
+        if (savedNotesData) {
+            notes = JSON.parse(savedNotesData);
+        }
+        
         if (keytermsContent) {
             processKeyTerms();
+        }
+        
+        if (learningObjectivesContent) {
+            processLearningObjectives();
         }
     } catch (e) {
         console.error('Error loading from localStorage:', e);
