@@ -59,6 +59,11 @@
                             <label for="learning-objectives-file">Learning Objectives File:</label>
                             <input type="file" id="learning-objectives-file" accept=".txt">
                         </div>
+                        <div class="file-row">
+                            <label for="bulk-notes-files">Bulk Notes Upload:</label>
+                            <input type="file" id="bulk-notes-files" accept=".txt" multiple>
+                            <p class="help-text">Upload multiple notes files at once</p>
+                        </div>
                         <button id="load-files">Load Files</button>
                         <button id="save-files">Save Files</button>
                     </div>
@@ -136,24 +141,53 @@
                 <!-- Image Management Section -->
                 <div class="image-management">
                     <h3>Manage Images</h3>
-                    <div class="form-row">
-                        <label for="image-upload">Upload Image:</label>
-                        <input type="file" id="image-upload" accept="image/*">
+                    <div class="image-upload-tabs">
+                        <button class="image-tab-btn active" data-tab="single-image">Single Image</button>
+                        <button class="image-tab-btn" data-tab="bulk-images">Bulk Upload</button>
                     </div>
-                    <div class="form-row">
-                        <label for="image-title">Image Title:</label>
-                        <input type="text" id="image-title" placeholder="Enter a title for this image">
+                    
+                    <div id="single-image" class="image-tab-pane active">
+                        <div class="form-row">
+                            <label for="image-upload">Upload Image:</label>
+                            <input type="file" id="image-upload" accept="image/*">
+                        </div>
+                        <div class="form-row">
+                            <label for="image-title">Image Title:</label>
+                            <input type="text" id="image-title" placeholder="Enter a title for this image">
+                        </div>
+                        <div class="form-row">
+                            <label for="image-description">Description:</label>
+                            <textarea id="image-description" placeholder="Enter a description for this image (optional)"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <label for="associated-terms">Associated Terms:</label>
+                            <textarea id="associated-terms" placeholder="Enter terms associated with this image (comma-separated)"></textarea>
+                            <p class="help-text">These terms will be linked to this image. When studying these terms, this image will be shown.</p>
+                        </div>
+                        <button id="save-image">Save Image</button>
                     </div>
-                    <div class="form-row">
-                        <label for="image-description">Description:</label>
-                        <textarea id="image-description" placeholder="Enter a description for this image (optional)"></textarea>
+                    
+                    <div id="bulk-images" class="image-tab-pane">
+                        <div class="form-row">
+                            <label for="bulk-image-upload">Upload Multiple Images:</label>
+                            <input type="file" id="bulk-image-upload" accept="image/*" multiple>
+                            <p class="help-text">Select multiple images to upload at once</p>
+                        </div>
+                        <div class="form-row">
+                            <label for="bulk-associated-terms">Common Associated Terms:</label>
+                            <textarea id="bulk-associated-terms" placeholder="Enter terms to associate with all images (comma-separated)"></textarea>
+                            <p class="help-text">These terms will be linked to all uploaded images</p>
+                        </div>
+                        <div class="form-row">
+                            <label>Image Titles:</label>
+                            <p class="help-text">Images will be titled using their filenames by default</p>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="custom-titles" checked>
+                                <label for="custom-titles">Use filenames as titles</label>
+                            </div>
+                        </div>
+                        <button id="save-bulk-images">Upload Images</button>
                     </div>
-                    <div class="form-row">
-                        <label for="associated-terms">Associated Terms:</label>
-                        <textarea id="associated-terms" placeholder="Enter terms associated with this image (comma-separated)"></textarea>
-                        <p class="help-text">These terms will be linked to this image. When studying these terms, this image will be shown.</p>
-                    </div>
-                    <button id="save-image">Save Image</button>
                     
                     <div class="saved-images">
                         <h4>Saved Images</h4>
