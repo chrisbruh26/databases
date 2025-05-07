@@ -20,6 +20,7 @@
             <button class="tab-btn" data-tab="notes">Notes</button>
             <button class="tab-btn" data-tab="quiz">Quiz Mode</button>
             <button class="tab-btn" data-tab="study">Study Session</button>
+            <button class="tab-btn" data-tab="text-styler">Text Styler</button>
         </div>
 
         <div class="tab-content">
@@ -286,6 +287,9 @@
                                     <span class="tool-icon">🗑</span> Delete
                                 </button>
                             </div>
+                            <div id="tool-tip" class="tool-tip">
+                                Click and drag items to move them. Double-click to edit text.
+                            </div>
                         </div>
                     </div>
                     <div class="concept-map-canvas-container">
@@ -404,11 +408,106 @@
                     <button id="back-from-objectives" class="back-button">Back to Options</button>
                 </div>
             </div>
+            
+            <!-- Text Styler Tab -->
+            <div id="text-styler" class="tab-pane">
+                <div class="text-styler-container">
+                    <h3>Text Range Styler</h3>
+                    <p class="help-text">Paste your text (formatting will be preserved), specify a word range, and apply styling. You can apply multiple styles to different sections. Use the "Copy Range" button to copy styled text back to your document.</p>
+                    
+                    <div class="text-styler-controls">
+                        <div class="form-row">
+                            <label for="text-input">Paste your text:</label>
+                            <textarea id="text-input" placeholder="Paste your text here..." rows="10"></textarea>
+                        </div>
+                        
+                        <div class="range-selector">
+                            <h4>Select Word Range</h4>
+                            <div class="form-row">
+                                <label for="start-word">Start Word:</label>
+                                <input type="text" id="start-word" placeholder="Enter first word">
+                            </div>
+                            <div class="form-row">
+                                <label for="end-word">End Word:</label>
+                                <input type="text" id="end-word" placeholder="Enter last word">
+                            </div>
+                        </div>
+                        
+                        <div class="style-options">
+                            <h4>Style Options</h4>
+                            <div class="form-row">
+                                <label for="text-color">Text Color:</label>
+                                <input type="color" id="text-color" value="#000000">
+                            </div>
+                            <div class="form-row">
+                                <label for="font-family">Font:</label>
+                                <select id="font-family">
+                                    <option value="Arial, sans-serif">Arial</option>
+                                    <option value="'Times New Roman', serif">Times New Roman</option>
+                                    <option value="'Courier New', monospace">Courier New</option>
+                                    <option value="Georgia, serif">Georgia</option>
+                                    <option value="Verdana, sans-serif">Verdana</option>
+                                    <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                                    <option value="Calibri, sans-serif">Calibri</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="font-size">Font Size:</label>
+                                <select id="font-size">
+                                    <option value="10px">10px</option>
+                                    <option value="12px">12px</option>
+                                    <option value="14px" selected>14px</option>
+                                    <option value="16px">16px</option>
+                                    <option value="18px">18px</option>
+                                    <option value="20px">20px</option>
+                                    <option value="24px">24px</option>
+                                    <option value="28px">28px</option>
+                                    <option value="32px">32px</option>
+                                </select>
+                            </div>
+                            <div class="form-row style-checkboxes">
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="style-bold">
+                                    <label for="style-bold">Bold</label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="style-italic">
+                                    <label for="style-italic">Italic</label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="style-underline">
+                                    <label for="style-underline">Underline</label>
+                                </div>
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="style-highlight">
+                                    <label for="style-highlight">Highlight</label>
+                                </div>
+                            </div>
+                            <div class="form-row" id="highlight-color-row" style="display: none;">
+                                <label for="highlight-color">Highlight Color:</label>
+                                <input type="color" id="highlight-color" value="#ffff00">
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button id="apply-style">Apply Style</button>
+                            <button id="copy-range">Copy Range</button>
+                            <button id="reset-text">Reset Text</button>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-section">
+                        <h4>Preview</h4>
+                        <div id="text-preview" class="text-preview"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="script.js"></script>
     <script src="concept-map.js"></script>
     <script src="notes-editor.js"></script>
+    <script src="text-styler.js"></script>
 </body>
 </html>
