@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyric & Title Generator</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: #0f0;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .container {
+            border: 1px solid #0f0;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        
+        .output-area {
+            min-height: 300px;
+            max-height: 500px;
+            background-color: #111;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+        }
+        
+        .input-area {
+            display: flex;
+            margin-top: 10px;
+        }
+        
+        input, select {
+            flex-grow: 1;
+            background-color: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button {
+            background-color: #0f0;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background-color: #00ff99;
+            transform: scale(1.05);
+        }
+        
+        .title {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .instructions {
+            margin-bottom: 15px;
+            color: #0c0;
+            background-color: #111;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .mode-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .mode-button {
+            background-color: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        .mode-button:hover {
+            background-color: #0f0;
+            color: #000;
+            transform: scale(1.05);
+        }
+        
+        .panel {
+            background-color: #111;
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #0f0;
+            border-bottom: 1px solid #0f0;
+            padding-bottom: 5px;
+        }
+        
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .file-list {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            border-bottom: 1px dashed #0f0;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-remove {
+            color: #ff3333;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background-color: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: #0f0;
+            color: #000;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .slider-container {
+            margin: 10px 0;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .slider {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 5px;
+            border-radius: 5px;
+            background: #333;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #0f0;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #0f0;
+            cursor: pointer;
+        }
+        
+        .priority-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .priority-word {
+            background-color: #0f0;
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .priority-word span {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .dropdown {
+            width: 100%;
+            padding: 8px;
+            background-color: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+            cursor: pointer;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #111;
+            width: 100%;
+            border: 1px solid #0f0;
+            z-index: 1;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .dropdown-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #222;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        
+        .checkbox-container input {
+            margin-right: 10px;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 5px;
+            cursor: help;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #0f0;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+        
+        .glitch-effect {
+            animation: glitch 0.3s linear;
+        }
+        
+        .source-badge {
+            display: inline-block;
+            background-color: #333;
+            color: #0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lyric & Title Generator</h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="generator">Generator</div>
+            <div class="tab" data-tab="sources">Sources</div>
+            <div class="tab" data-tab="settings">Settings</div>
+        </div>
+        
+        <div class="tab-content active" id="generator-tab">
+            <div class="instructions">
+                <strong>Generation Modes:</strong><br>
+                <strong>0:</strong> True Random - Completely random word combinations<br>
+                <strong>1:</strong> Song Title - Article/adjective/noun patterns<br>
+                <strong>2:</strong> Lyric Line - Pronoun/verb/preposition patterns<br>
+                <strong>3:</strong> Smart Mix - Contextually aware combinations<br>
+                <strong>4:</strong> Themed - Uses your priority words/themes
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">Generation Options</div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Number of outputs: <span id="output-count-value">10</span></span>
+                    </div>
+                    <input type="range" min="1" max="20" value="10" class="slider" id="output-count">
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Creativity level: <span id="creativity-value">5</span></span>
+                        <div class="tooltip">?
+                            <span class="tooltiptext">Higher values produce more unusual combinations</span>
+                        </div>
+                    </div>
+                    <input type="range" min="1" max="10" value="5" class="slider" id="creativity">
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="grammar-check" checked>
+                    <label for="grammar-check">Apply basic grammar rules</label>
+                    <div class="tooltip">?
+                        <span class="tooltiptext">Ensures outputs follow basic grammar patterns</span>
+                    </div>
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="show-source">
+                    <label for="show-source">Show word sources</label>
+                    <div class="tooltip">?
+                        <span class="tooltiptext">Displays which source file each word came from</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">Priority Words</div>
+                <div class="input-area">
+                    <input type="text" id="priority-input" placeholder="Add words to prioritize...">
+                    <button id="add-priority">Add</button>
+                </div>
+                <div class="priority-words" id="priority-words-container">
+                    <!-- Priority words will be added here -->
+                </div>
+            </div>
+            
+            <div class="mode-buttons">
+                <button class="mode-button" data-mode="0">True Random</button>
+                <button class="mode-button" data-mode="1">Song Title</button>
+                <button class="mode-button" data-mode="2">Lyric Line</button>
+                <button class="mode-button" data-mode="3">Smart Mix</button>
+                <button class="mode-button" data-mode="4">Themed</button>
+            </div>
+            
+            <div id="output" class="output-area"></div>
+            <div class="input-area">
+                <select id="generation-mode">
+                    <option value="0">True Random</option>
+                    <option value="1">Song Title</option>
+                    <option value="2">Lyric Line</option>
+                    <option value="3">Smart Mix</option>
+                    <option value="4">Themed</option>
+                </select>
+                <button id="submitBtn">Generate</button>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="sources-tab">
+            <div class="panel">
+                <div class="panel-title">Upload Text Sources</div>
+                <div class="file-upload">
+                    <input type="file" id="file-upload" accept=".txt" multiple>
+                    <button id="upload-btn">Upload Files</button>
+                    <div class="instructions">
+                        Upload .txt files containing lyrics, song titles, or any text you want to use for generation.
+                        <br>Each file will be treated as a separate source.
+                    </div>
+                </div>
+                <div class="file-list" id="file-list">
+                    <div class="file-item">
+                        <span>Default Lyrics (embedded)</span>
+                        <span class="file-remove" data-id="default">×</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">Source Weights</div>
+                <div id="source-weights">
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Default Lyrics: <span id="default-weight-value">100%</span></span>
+                        </div>
+                        <input type="range" min="0" max="100" value="100" class="slider source-weight" data-source="default">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="settings-tab">
+            <div class="panel">
+                <div class="panel-title">Generation Settings</div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="capitalize" checked>
+                    <label for="capitalize">Capitalize first letter</label>
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="filter-duplicates" checked>
+                    <label for="filter-duplicates">Filter duplicate words</label>
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="add-punctuation">
+                    <label for="add-punctuation">Add random punctuation</label>
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Min words per output: <span id="min-words-value">3</span></span>
+                    </div>
+                    <input type="range" min="1" max="10" value="3" class="slider" id="min-words">
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Max words per output: <span id="max-words-value">7</span></span>
+                    </div>
+                    <input type="range" min="3" max="15" value="7" class="slider" id="max-words">
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">Export/Import</div>
+                <button id="export-settings">Export Settings</button>
+                <button id="import-settings">Import Settings</button>
+                <div class="instructions">
+                    Export your current settings and sources to a file, or import previously saved settings.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="song_title_generator.js"></script>
+</body>
+</html>
